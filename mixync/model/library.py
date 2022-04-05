@@ -1,0 +1,53 @@
+from sqlalchemy import Column, ForeignKey, DateTime, Integer, Float, String, Text, LargeBinary
+from sqlalchemy.sql import func
+
+from mixync.model import Base
+
+class Library(Base):
+    __tablename__ = 'library'
+
+    id = Column(Integer, primary_key=True)
+    artist = Column(String(64))
+    title = Column(String(64))
+    album = Column(String(64))
+    year = Column(String(16))
+    genre = Column(String(64))
+    tracknumber = Column(String(3))
+    location = Column(ForeignKey('track_locations.location'))
+    comment = Column(String(256))
+    url = Column(String(256))
+    duration = Column(Float)
+    samplerate = Column(Integer)
+    cuepoint = Column(Integer)
+    bpm = Column(Float)
+    wavesummaryhey = Column(LargeBinary)
+    channels = Column(Integer)
+    datetime_added = Column(DateTime, server_default=func.now())
+    mixxx_deleted = Column(Integer)
+    played = Column(Integer)
+    header_parsed = Column(Integer, default=0)
+    filetype = Column(String(8), default='?')
+    replaygain = Column(Float, default=0.0)
+    replaygain_peak = Column(Float, default=-1.0) # TODO: The SQLite schema says REAL, does this matter?
+    timesplayed = Column(Integer, default=0)
+    rating = Column(Integer, default=0)
+    key = Column(String(8), default='')
+    beats = Column(LargeBinary)
+    beats_version = Column(Text)
+    composer = Column(String(64), default='')
+    bpm_lock = Column(Integer, default=0)
+    beats_sub_version = Column(Text, default='')
+    keys = Column(LargeBinary)
+    keys_version = Column(Text)
+    keys_sub_version = Column(Text)
+    key_id = Column(Integer, default=0)
+    grouping = Column(Text, default='')
+    album_artist = Column(Text, default='')
+    coverart_source = Column(Integer, default=0)
+    coverart_location = Column(Text, default='')
+    coverart_color = Column(Integer)
+    coverart_digest = Column(LargeBinary)
+    tracktotal = Column(Text, default='//')
+    color = Column(Integer)
+    last_played_at = Column(DateTime, default=None)
+    source_synchronized_ms = Column(Integer, default=None)
