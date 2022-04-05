@@ -3,9 +3,9 @@
 > **NOTE: The project is still in very early stages, so please make sure to back up your mixxxdb and your music before trying it.**
 
 ```
-+-------------------+     mixync
-|    Your local     |   <--------+
-|  mixxxdb.sqlite3  |            |    +--------------------------+ 
++-------------------+  
+|    Your local     |     mixync
+|  mixxxdb.sqlite3  |   <--------+    +--------------------------+
 +-------------------+            |    | A portable mixxxlib with |
                                  +--> |  all your tracks, cues,  |
 +-------------------+            |    | grids and other metadata |
