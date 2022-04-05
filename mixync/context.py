@@ -6,7 +6,7 @@ from mixync.store.portable import PortableStore
 
 @dataclass
 class Context:
-    # The local mixxxdb.sqlite3
+    # The local mixxxdb.sqlite
     local_store: LocalStore
     # The portable *.mixxxlib
     portable_store: PortableStore

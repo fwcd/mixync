@@ -30,10 +30,10 @@ def find_local_mixxxdir() -> Path:
     return None
 
 def main():
-    local_mixxxdb = find_local_mixxxdir() / 'mixxxdb.sqlite3'
+    local_mixxxdb = find_local_mixxxdir() / 'mixxxdb.sqlite'
 
     parser = argparse.ArgumentParser(description='Tool for copying Mixxx databases with tracks in a portable manner')
-    parser.add_argument('--local', default=local_mixxxdb, required=local_mixxxdb == None, help='The path to the local mixxxdb.sqlite3.')
+    parser.add_argument('--local', default=local_mixxxdb, required=local_mixxxdb == None, help='The path to the local mixxxdb.sqlite.')
     parser.add_argument('--dry-run', action='store_true', help='Whether to only simulate a run without copying or changing any files.')
     parser.add_argument('command', choices=sorted(COMMANDS.keys()), help='The command to perform.')
     parser.add_argument('portable', help='The path or URL to the (possibly remote) *.mixxxlib directory (will be created if not exists).')

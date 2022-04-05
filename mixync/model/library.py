@@ -20,7 +20,7 @@ class Library(Base):
     samplerate = Column(Integer)
     cuepoint = Column(Integer)
     bpm = Column(Float)
-    wavesummaryhey = Column(LargeBinary)
+    wavesummaryhex = Column(LargeBinary)
     channels = Column(Integer)
     datetime_added = Column(DateTime, server_default=func.now())
     mixxx_deleted = Column(Integer)
