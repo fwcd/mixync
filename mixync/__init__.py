@@ -13,7 +13,7 @@ COMMANDS = {
     'pull': perform_pull,
 }
 
-MIXXXDB_PATHS = [
+MIXXXDIR_PATHS = [
     # Linux
     Path.home() / '.mixxx',
     # macOS
@@ -23,14 +23,14 @@ MIXXXDB_PATHS = [
     Path.home() / 'AppData' / 'Local' / 'Mixxx',
 ]
 
-def find_local_mixxxdb() -> Path:
-    for path in MIXXXDB_PATHS:
+def find_local_mixxxdir() -> Path:
+    for path in MIXXXDIR_PATHS:
         if path.is_dir():
             return path
     return None
 
 def main():
-    local_mixxxdb = find_local_mixxxdb()
+    local_mixxxdb = find_local_mixxxdir() / 'mixxxdb.sqlite3'
 
     parser = argparse.ArgumentParser(description='Tool for copying Mixxx databases with tracks in a portable manner')
     parser.add_argument('--local', default=local_mixxxdb, required=local_mixxxdb == None, help='The path to the local mixxxdb.sqlite3.')
