@@ -1,10 +1,13 @@
 import argparse
 
 from pathlib import Path
+from mixync.commands.push import perform_push
+from mixync.commands.pull import perform_pull
+from mixync.options import Options
 
 COMMANDS = {
-    'push': (),
-    'pull': ()
+    'push': perform_push,
+    'pull': perform_pull,
 }
 
 MIXXXDB_PATHS = [
@@ -26,15 +29,19 @@ def find_local_mixxxdb() -> Path:
 def main():
     local_mixxxdb = find_local_mixxxdb()
 
-    parser = argparse.ArgumentParser(description='Tool for copying Mixxx databases in a portable manner')
+    parser = argparse.ArgumentParser(description='Tool for copying Mixxx databases with tracks in a portable manner')
     parser.add_argument('--local', default=local_mixxxdb, required=local_mixxxdb == None, help='The path to the local mixxxdb.sqlite3.')
+    parser.add_argument('--dry-run', action='store_true', help='Whether to only simulate a run without copying or changing any files.')
     parser.add_argument('command', choices=sorted(COMMANDS.keys()), help='The command to perform.')
     parser.add_argument('portable', help='The path or URL to the (possibly remote) *.mixxxlib directory (will be created if not exists).')
 
     args = parser.parse_args()
 
     command = COMMANDS[args.command]
-    local_path = Path(args.local)
-    portable_path = Path(args.portable)
+    options = Options(
+        local_path=Path(args.local),
+        portable_path=Path(args.portable),
+        dry_run=args.dry_run
+    )
 
-    # TODO: Copy
+    command(options)
