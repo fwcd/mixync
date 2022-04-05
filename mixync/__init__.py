@@ -1,14 +1,23 @@
 import argparse
 import pathlib
 
+COMMANDS = {
+    'push': (),
+    'pull': ()
+}
+
 def main():
     parser = argparse.ArgumentParser(description='Tool for copying Mixxx databases in a portable manner')
-    parser.add_argument('src', help='The source (either a mixxxdb.sqlite3 or a *.mixxxlib)')
-    parser.add_argument('dest', help='The destination (either a mixxxdb.sqlite3 or a *.mixxxlib)')
+
+    # TODO: Figure out local path automatically
+    parser.add_argument('--local', help='The path to the local mixxxdb.sqlite3.')
+    parser.add_argument('command', choices=sorted(COMMANDS.keys()), help='The command to perform.')
+    parser.add_argument('portable', help='The path or URL to the (possibly remote) *.mixxxlib directory (will be created if not exists).')
 
     args = parser.parse_args()
 
-    src_path = pathlib.Path(args.src)
-    dest_path = pathlib.Path(args.dest)
+    command = COMMANDS[args.command]
+    local_path = pathlib.Path(args.local)
+    portable_path = pathlib.Path(args.portable)
 
     # TODO: Copy
