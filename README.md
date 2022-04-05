@@ -1,3 +1,3 @@
 # Mixync
 
-A small CLI tool for copying a Mixxx database between folders and across the network (TODO!) in a portable manner, i.e. automatically patching paths as needed.
+A small CLI tool for copying a Mixxx database along with tracks to and from a portable folder (`*.mixxxlib`) for archival, storage on a flash drive, a web server, etc.
