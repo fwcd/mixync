@@ -1,9 +1,12 @@
 import argparse
 
 from pathlib import Path
-from mixync.commands.push import perform_push
-from mixync.commands.pull import perform_pull
-from mixync.options import Options
+
+from mixync.context import Context
+from mixync.command.push import perform_push
+from mixync.command.pull import perform_pull
+from mixync.store.local import LocalStore
+from mixync.store.portable import PortableStore
 
 COMMANDS = {
     'push': perform_push,
@@ -38,10 +41,12 @@ def main():
     args = parser.parse_args()
 
     command = COMMANDS[args.command]
-    options = Options(
-        local_path=Path(args.local),
-        portable_path=Path(args.portable),
-        dry_run=args.dry_run
+    local_path = Path(args.local)
+    portable_path = Path(args.portable)
+
+    context = Context(
+        local_store=LocalStore(local_path),
+        portable_store=PortableStore(portable_path)
     )
 
-    command(options)
+    command(context)
