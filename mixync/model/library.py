@@ -22,13 +22,15 @@ class Library(Base):
     bpm = Column(Float)
     wavesummaryhex = Column(LargeBinary)
     channels = Column(Integer)
-    datetime_added = Column(DateTime, server_default=func.now())
+    # TODO: SQLite seems to have trouble parsing some datetime strings from Mixxx
+    # datetime_added = Column(DateTime, server_default=func.now())
     mixxx_deleted = Column(Integer)
     played = Column(Integer)
     header_parsed = Column(Integer, default=0)
     filetype = Column(String(8), default='?')
     replaygain = Column(Float, default=0.0)
-    replaygain_peak = Column(Float, default=-1.0) # TODO: The SQLite schema says REAL, does this matter?
+    # TODO: The SQLite schema says REAL, does this matter?
+    replaygain_peak = Column(Float, default=-1.0)
     timesplayed = Column(Integer, default=0)
     rating = Column(Integer, default=0)
     key = Column(String(8), default='')

@@ -12,4 +12,5 @@ class LocalStore:
         self.connection = engine.connect()
 
         # DEBUG
-        print(self.connection.execute(select(Library)).all())
+        for row in self.connection.execute(select(Library)):
+            print(row)
