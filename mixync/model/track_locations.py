@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String
 
 from mixync.model import Base
 
-class TrackLocations(Base):
+class TrackLocation(Base):
     __tablename__ = 'track_locations'
 
     id = Column(Integer, primary_key=True)

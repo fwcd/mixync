@@ -3,7 +3,7 @@ from sqlalchemy.sql import func
 
 from mixync.model import Base
 
-class Library(Base):
+class LibraryEntry(Base):
     __tablename__ = 'library'
 
     id = Column(Integer, primary_key=True)

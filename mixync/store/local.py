@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from pathlib import Path
 
 from mixync.model.library import *
@@ -9,8 +10,10 @@ class LocalStore:
 
     def __init__(self, path: Path):
         engine = create_engine(f'sqlite:///{path}')
-        self.connection = engine.connect()
+        self.Session = sessionmaker(bind=engine)
 
-        # DEBUG
-        for row in self.connection.execute(select(Library)):
-            print(row)
+    def query(self, cls):
+        with self.Session() as session:
+            for row in session.query(cls):
+                yield row
+    

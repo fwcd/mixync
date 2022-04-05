@@ -1,5 +1,5 @@
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine, insert
+from sqlalchemy.orm import sessionmaker
 from pathlib import Path
 
 from mixync.model import Base
@@ -13,10 +13,15 @@ class PortableStore:
         path.mkdir(parents=True, exist_ok=True)
 
         db_path = path / 'mixxxdb.portable.sqlite'
-        engine = create_engine(f'sqlite:///{db_path}')
-        self.connection = engine.connect()
+        self.engine = create_engine(f'sqlite:///{db_path}')
+        self.Session = sessionmaker(bind=self.engine)
 
         self.create_tables()
     
     def create_tables(self):
-        Base.metadata.create_all(self.connection, checkfirst=True)
+        Base.metadata.create_all(self.engine, checkfirst=True)
+    
+    def add_all(self, rows):
+        with self.Session() as session:
+            session.add_all(rows)
+            session.commit()
