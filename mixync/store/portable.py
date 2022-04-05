@@ -1,4 +1,4 @@
-import sqlite3
+import sqlalchemy
 
 from pathlib import Path
 
@@ -9,7 +9,7 @@ class PortableStore:
         path.mkdir(parents=True, exist_ok=True)
 
         db_path = path / 'mixxxdb.portable.sqlite3'
-        self.connection = sqlite3.connect(db_path)
+        self.connection = sqlalchemy.create_engine(f'sqlite:///{db_path}')
 
         self.create_tables()
     
