@@ -6,10 +6,15 @@ from mixync.model.library import LibraryEntry
 from mixync.model.track_locations import TrackLocation
 
 def perform_push(ctx: Context):
-    copy_library(ctx)
-    copy_track_locations(ctx)
+    # Copy database
+    copy_db_library(ctx)
+    copy_db_track_locations(ctx)
+    copy_db_directories(ctx)
 
-def copy_library(ctx: Context):
+    # TODO: Copy (rsync?) file trees
+    # TODO: Copy (rsync?) analysis meta
+
+def copy_db_library(ctx: Context):
     entries = []
     with ctx.local_store.session() as local_session:
         with ctx.portable_store.session() as portable_session:
@@ -28,7 +33,7 @@ def copy_library(ctx: Context):
 
     print(f'==> Copied {len(entries)} library entries')
 
-def copy_track_locations(ctx: Context):
+def copy_db_track_locations(ctx: Context):
     entries = []
     visited_locations = set()
     with ctx.local_store.session() as local_session:
@@ -51,3 +56,5 @@ def copy_track_locations(ctx: Context):
             portable_session.commit()
 
     print(f'==> Copied {len(entries)} track locations')
+
+def copy_db_directories(ctx: Context):
