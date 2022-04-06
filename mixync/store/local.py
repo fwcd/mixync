@@ -10,10 +10,4 @@ class LocalStore:
 
     def __init__(self, path: Path):
         engine = create_engine(f'sqlite:///{path}')
-        self.Session = sessionmaker(bind=engine)
-
-    def query(self, cls):
-        with self.Session() as session:
-            for row in session.query(cls):
-                yield row
-    
+        self.session = sessionmaker(bind=engine)

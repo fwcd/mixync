@@ -1,5 +1,4 @@
-from sqlalchemy import Column, ForeignKey, DateTime, Integer, Float, String, Text, LargeBinary
-from sqlalchemy.sql import func
+from sqlalchemy import Column, ForeignKey, DateTime, Integer, Float, String, Text, LargeBinary, UniqueConstraint
 
 from mixync.model import Base
 

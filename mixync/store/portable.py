@@ -14,14 +14,9 @@ class PortableStore:
 
         db_path = path / 'mixxxdb.portable.sqlite'
         self.engine = create_engine(f'sqlite:///{db_path}')
-        self.Session = sessionmaker(bind=self.engine)
+        self.session = sessionmaker(bind=self.engine)
 
         self.create_tables()
     
     def create_tables(self):
         Base.metadata.create_all(self.engine, checkfirst=True)
-    
-    def add_all(self, rows):
-        with self.Session() as session:
-            session.add_all(rows)
-            session.commit()
