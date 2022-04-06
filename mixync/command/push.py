@@ -4,15 +4,12 @@ from mixync.context import Context
 from mixync.model.library import LibraryEntry
 
 def perform_push(ctx: Context):
-    local = ctx.local_store
-    portable = ctx.portable_store
+    copy_library(ctx)
 
-    # TODO: Handle duplicates
-
-    # Copy library
+def copy_library(ctx: Context):
     entries = []
-    with local.session() as local_session:
-        with portable.session() as portable_session:
+    with ctx.local_store.session() as local_session:
+        with ctx.portable_store.session() as portable_session:
             for row in local_session.query(LibraryEntry):
                 make_transient(row)
                 row.id = None
@@ -25,4 +22,3 @@ def perform_push(ctx: Context):
             portable_session.add_all(entries)
             portable_session.commit()
     print(f'==> Copied {len(entries)} library entries')
-
