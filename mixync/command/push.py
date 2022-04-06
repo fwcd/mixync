@@ -9,7 +9,6 @@ def perform_push(ctx: Context):
     # Copy database
     copy_db_library(ctx)
     copy_db_track_locations(ctx)
-    copy_db_directories(ctx)
 
     # TODO: Copy (rsync?) file trees
     # TODO: Copy (rsync?) analysis meta
@@ -56,5 +55,3 @@ def copy_db_track_locations(ctx: Context):
             portable_session.commit()
 
     print(f'==> Copied {len(entries)} track locations')
-
-def copy_db_directories(ctx: Context):
