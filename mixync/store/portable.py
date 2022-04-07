@@ -4,7 +4,7 @@ from pathlib import Path
 
 from mixync.model import Base
 from mixync.model.track import *
-from mixync.model.track_locations import *
+from mixync.model.track_location import *
 
 class PortableStore:
     """A wrapper around the portable mixxxlib."""

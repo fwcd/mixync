@@ -3,7 +3,7 @@ from pathlib import Path
 
 from mixync.context import Context
 from mixync.model.track import Track
-from mixync.model.track_locations import TrackLocation
+from mixync.model.track_location import TrackLocation
 
 def perform_push(ctx: Context):
     # Copy database

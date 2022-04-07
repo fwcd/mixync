@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from pathlib import Path
 
 from mixync.model.track import *
-from mixync.model.track_locations import *
+from mixync.model.track_location import *
 
 class LocalStore:
     """A wrapper around the user's local mixxxdb."""
