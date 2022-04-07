@@ -5,18 +5,15 @@ Like `rsync` but for Mixxx databases and music.
 > **NOTE: The project is still in very early stages, so please make sure to back up your mixxxdb and your music before trying it.**
 
 ```
-+-------------------+  
-|    Your local     |     mixync
-|  mixxxdb.sqlite   |   <--------+    +--------------------------+
-+-------------------+            |    | A portable mixxxlib with |
-                                 +--> |  all your tracks, cues,  |
-+-------------------+            |    | grids and other metadata |
-|    Your local     |   <--------+    +--------------------------+
++-------------------+
+|    Your local     |
+|  mixxxdb.sqlite   |   <--+                +--------------------------+
++-------------------+      |                | A portable mixxxlib with |
+                           +--> mixync <--> |  all your tracks, cues,  |
++-------------------+      |                | grids and other metadata |
+|    Your local     |   <--+                +--------------------------+
 |   music folders   |
 +-------------------+
-
-                         Push: -->
-                         Pull: <--
 ```
 
 A small CLI tool for copying a Mixxx database along with tracks to and from a portable folder (`*.mixxxlib`) for archival, storage on a flash drive, a web server, etc.
