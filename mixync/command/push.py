@@ -6,9 +6,10 @@ from mixync.model.track import Track
 from mixync.model.track_location import TrackLocation
 
 def perform_push(ctx: Context):
+    raise NotImplementedError('TODO')
     # Copy database
-    copy_db_library(ctx)
-    copy_db_track_locations(ctx)
+    # copy_db_library(ctx)
+    # copy_db_track_locations(ctx)
 
     # TODO: Copy (rsync?) file trees
     # TODO: Copy (rsync?) analysis meta

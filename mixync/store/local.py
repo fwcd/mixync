@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, make_transient
 from pathlib import Path
 
 from mixync.model.track import *
@@ -11,4 +11,21 @@ class LocalStore(Store):
 
     def __init__(self, path: Path):
         engine = create_engine(f'sqlite:///{path}')
-        self.session = sessionmaker(bind=engine)
+        self.make_session = sessionmaker(bind=engine)
+    
+    def _query_all(self, *args, **kwargs) -> list:
+        with self.make_session() as session:
+            for row in session.query(*args, **kwargs):
+                make_transient(row)
+                row.id = None
+                yield row
+    
+    def tracks(self) -> list[Track]:
+        return list(self._query_all(Track))
+    
+    # TODO: Relativize paths
+
+    def track_locations(self) -> list[TrackLocation]:
+        return list(self._query_all(TrackLocation))
+    
+    # TODO: Update methods

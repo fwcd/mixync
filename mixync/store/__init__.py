@@ -1,5 +1,5 @@
-from model.track import Track
-from model.track_location import TrackLocation
+from mixync.model.track import Track
+from mixync.model.track_location import TrackLocation
 
 class Store:
     """A store interface for music and metadata, e.g. a local mixxxdb or a remote server."""

@@ -1,5 +1,5 @@
-from sqlalchemy import create_engine, insert
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, make_transient
 from pathlib import Path
 
 from mixync.model import Base
@@ -15,9 +15,22 @@ class PortableStore(Store):
 
         db_path = path / 'mixxxdb.portable.sqlite'
         self.engine = create_engine(f'sqlite:///{db_path}')
-        self.session = sessionmaker(bind=self.engine)
+        self.make_session = sessionmaker(bind=self.engine)
 
-        self.create_tables()
+        self._create_tables()
     
-    def create_tables(self):
+    def _create_tables(self):
         Base.metadata.create_all(self.engine, checkfirst=True)
+    
+    def _query_all(self, *args, **kwargs) -> list:
+        with self.make_session() as session:
+            for row in session.query(*args, **kwargs):
+                make_transient(row)
+                row.id = None
+                yield row
+    
+    def tracks(self) -> list[Track]:
+        return list(self._query_all(Track))
+    
+    def track_locations(self) -> list[TrackLocation]:
+        return list(self._query_all(TrackLocation))
