@@ -4,8 +4,9 @@ from pathlib import Path
 
 from mixync.model.track import *
 from mixync.model.track_location import *
+from mixync.store import Store
 
-class LocalStore:
+class LocalStore(Store):
     """A wrapper around the user's local mixxxdb."""
 
     def __init__(self, path: Path):

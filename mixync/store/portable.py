@@ -5,8 +5,9 @@ from pathlib import Path
 from mixync.model import Base
 from mixync.model.track import *
 from mixync.model.track_location import *
+from mixync.store import Store
 
-class PortableStore:
+class PortableStore(Store):
     """A wrapper around the portable mixxxlib."""
 
     def __init__(self, path: Path):
