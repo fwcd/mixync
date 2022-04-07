@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, String
 
-from mixync.model import Base
+from mixync.model import Base, dict_convertible
 
+@dict_convertible
 class TrackLocation(Base):
     __tablename__ = 'track_locations'
 

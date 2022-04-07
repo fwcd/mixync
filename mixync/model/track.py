@@ -1,7 +1,8 @@
-from sqlalchemy import Column, ForeignKey, DateTime, Integer, Float, String, Text, LargeBinary, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, DateTime, Integer, Float, String, Text, LargeBinary
 
-from mixync.model import Base
+from mixync.model import Base, dict_convertible
 
+@dict_convertible
 class Track(Base):
     __tablename__ = 'library'
 
