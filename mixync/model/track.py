@@ -2,7 +2,7 @@ from sqlalchemy import Column, ForeignKey, DateTime, Integer, Float, String, Tex
 
 from mixync.model import Base
 
-class LibraryEntry(Base):
+class Track(Base):
     __tablename__ = 'library'
 
     id = Column(Integer, primary_key=True)

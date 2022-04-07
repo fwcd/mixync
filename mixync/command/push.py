@@ -2,7 +2,7 @@ from sqlalchemy.orm import make_transient
 from pathlib import Path
 
 from mixync.context import Context
-from mixync.model.library import LibraryEntry
+from mixync.model.track import Track
 from mixync.model.track_locations import TrackLocation
 
 def perform_push(ctx: Context):
@@ -17,14 +17,14 @@ def copy_db_library(ctx: Context):
     entries = []
     with ctx.local_store.session() as local_session:
         with ctx.portable_store.session() as portable_session:
-            for row in local_session.query(LibraryEntry):
+            for row in local_session.query(Track):
                 make_transient(row)
                 row.id = None
                 # TODO: Find a more performant solution, perhaps involving a
                 #       unique constraint across (title, artist) on the portable
                 #       db and ignoring when a constraint would be violated?
                 #       (this seems to be non-trivial with the high-level ORM API though)
-                if not portable_session.query(LibraryEntry).where(LibraryEntry.title == row.title, LibraryEntry.artist == row.artist).first():
+                if not portable_session.query(Track).where(Track.title == row.title, Track.artist == row.artist).first():
                     entries.append(row)
 
             portable_session.add_all(entries)

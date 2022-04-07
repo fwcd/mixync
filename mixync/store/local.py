@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from pathlib import Path
 
-from mixync.model.library import *
+from mixync.model.track import *
 from mixync.model.track_locations import *
 
 class LocalStore:
