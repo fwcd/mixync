@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from mixync.model.directory import Directory
 from mixync.model.track import Track
 from mixync.model.track_location import TrackLocation
 from mixync.utils.progress import ProgressLine
@@ -48,6 +49,10 @@ class Store:
         """Fetches the track locations from this store."""
         return []
     
+    def directories(self) -> list[Directory]:
+        """Fetches the music directories from this store."""
+        return []
+
     def update_tracks(self, tracks: list[Track]):
         """Merges the given tracks (metadata only) into the store."""
         raise NotImplementedError(f'update_tracks is not implemented for {type(self).__name__}!')
@@ -55,6 +60,10 @@ class Store:
     def update_track_locations(self, track_locations: list[TrackLocation]):
         """Merges the given track locations into the store."""
         raise NotImplementedError(f'update_track_locations is not implemented for {type(self).__name__}!')
+
+    def update_directories(self, track_locations: list[TrackLocation]):
+        """Merges the given music directories into the store."""
+        raise NotImplementedError(f'update_directories is not implemented for {type(self).__name__}!')
     
     def relativize_track_location(self, track_location: TrackLocation) -> TrackLocation:
         """
@@ -71,6 +80,22 @@ class Store:
         identity function by default.
         """
         return track_location.clone()
+
+    def relativize_directory(self, directory: Directory) -> Directory:
+        """
+        Outputs a 'relative' variant of the directory for 'export',
+        passed to the other store in methods like 'copy_to'. This is the
+        identity function by default.
+        """
+        return directory.clone()
+    
+    def absolutize_directory(self, directory: Directory) -> Directory:
+        """
+        Outputs an 'absolute' variant of the directory for 'import',
+        passed to the this store in methods like 'copy_to'. This is the
+        identity function by default.
+        """
+        return directory.clone()
 
     def upload_track(self, location: str, raw: bytes):
         """
