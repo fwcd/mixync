@@ -32,4 +32,4 @@ def main():
     source = parse_ref(args.source)
     dest = parse_ref(args.dest)
 
-    source.copy_to(dest)
+    source.copy_to(dest, log=True)

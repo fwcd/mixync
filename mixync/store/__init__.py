@@ -9,6 +9,8 @@ class Store:
     def copy_to(self, other: Store, log: bool=False):
         """Copies the contents of this store to the given other store."""
 
+        # TODO: Deltas?
+
         tracks = self.tracks()
         other.update_tracks(tracks)
         if log:
