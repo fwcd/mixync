@@ -1,12 +1,13 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, make_transient
 from pathlib import Path
-from typing import Iterator, Type, TypeVar
+from typing import Iterator, Optional, Type, TypeVar
 from mixync.model import directory
 
 from mixync.model.directory import *
 from mixync.model.track import *
 from mixync.model.track_location import *
+from mixync.options import Options
 from mixync.store import Store
 
 T = TypeVar('T')
@@ -55,7 +56,7 @@ class LocalStore(Store):
                 row.id = None
                 yield row
     
-    def _find_base_directory(self, path: Path) -> Path:
+    def _find_base_directory(self, path: Path) -> Optional[Path]:
         directories = [Path(dir.directory) for dir in self._query_all(Directory)]
 
         # Add some default directories as fallback
@@ -71,13 +72,13 @@ class LocalStore(Store):
         # Fall back to the parent if no other base directory is found
         return path.parent
 
-    def relativize_directory(self, directory: Directory) -> Directory:
+    def relativize_directory(self, directory: Directory, opts: Options) -> Optional[Directory]:
         # TODO: Handle case where user may have multiple directories with same name?
         rel = directory.clone()
         rel.directory = Path(rel.directory).name
         return rel
 
-    def relativize_track_location(self, track_location: TrackLocation) -> TrackLocation:
+    def relativize_track_location(self, track_location: TrackLocation, opts: Options) -> Optional[TrackLocation]:
         rel = track_location.clone()
         # Relativize w.r.t a base directory from the db and POSIX-ify paths
         location = Path(rel.location)

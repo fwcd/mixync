@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Optional
 
 from mixync.model.directory import Directory
 from mixync.model.track import Track
@@ -23,29 +24,32 @@ class Store:
         
         # Copy directory metadata
         directories = self.directories()
-        rel_directories = [self.relativize_directory(d) for d in directories]
-        dest_directories = [other.absolutize_directory(d) for d in rel_directories]
-        other.update_directories(dest_directories)
+        rel_directories = [self.relativize_directory(d, opts) for d in directories]
+        dest_directories = [other.absolutize_directory(d, opts) for d in rel_directories]
+        updated_directories = [d for d in dest_directories if d]
+        other.update_directories(updated_directories)
         if opts.log:
-            print(f'==> Copied {len(directories)} directories')
+            print(f'==> Copied {len(updated_directories)} directories')
 
         # Copy track location metadata
         locations = self.track_locations()
-        rel_locations = [self.relativize_track_location(l) for l in locations]
-        dest_locations = [other.absolutize_track_location(l) for l in rel_locations]
-        other.update_track_locations(dest_locations)
+        rel_locations = [self.relativize_track_location(l, opts) for l in locations]
+        dest_locations = [other.absolutize_track_location(l, opts) for l in rel_locations]
+        updated_locations = [l for l in dest_locations if l]
+        other.update_track_locations(updated_locations)
         if opts.log:
-            print(f'==> Copied {len(locations)} track locations')
+            print(f'==> Copied {len(updated_locations)} track locations')
 
         # Copy actual track files
-        with ProgressLine(len(locations), final_newline=opts.log) as progress:
-            for location, dest_location in zip(locations, dest_locations):
+        zipped_locations = [(l, d) for l, d in zip(locations, dest_locations) if l and d]
+        with ProgressLine(len(zipped_locations), final_newline=opts.log) as progress:
+            for location, dest_location in zipped_locations:
                 raw = self.download_track(location.location)
                 other.upload_track(dest_location.location, raw)
                 if opts.log:
                     progress.print(f"Copied '{truncate(location.filename, 40)}' ({len(raw) / 1_000_000} MB)")
         if opts.log:
-            print(f'==> Copied {len(locations)} track files')
+            print(f'==> Copied {len(zipped_locations)} track files')
     
     @classmethod
     def parse_ref(cls, ref: str):
@@ -75,35 +79,35 @@ class Store:
         """Merges the given music directories into the store."""
         raise NotImplementedError(f'update_directories is not implemented for {type(self).__name__}!')
     
-    def relativize_track_location(self, track_location: TrackLocation) -> TrackLocation:
+    def relativize_track_location(self, track_location: TrackLocation, opts: Options) -> Optional[TrackLocation]:
         """
         Outputs a 'relative' variant of the track location for 'export',
-        passed to the other store in methods like 'copy_to'. This is the
-        identity function by default.
+        passed to the other store in methods like 'copy_to'. Returning
+        None will filter out this track. This is the identity function by default.
         """
         return track_location.clone()
     
-    def absolutize_track_location(self, track_location: TrackLocation) -> TrackLocation:
+    def absolutize_track_location(self, track_location: TrackLocation, opts: Options) -> Optional[TrackLocation]:
         """
         Outputs an 'absolute' variant of the track location for 'import',
-        passed to the this store in methods like 'copy_to'. This is the
-        identity function by default.
+        passed to the this store in methods like 'copy_to'. Returning
+        None will filter out this track. This is the identity function by default.
         """
         return track_location.clone()
 
-    def relativize_directory(self, directory: Directory) -> Directory:
+    def relativize_directory(self, directory: Directory, opts: Options) -> Optional[Directory]:
         """
         Outputs a 'relative' variant of the directory for 'export',
-        passed to the other store in methods like 'copy_to'. This is the
-        identity function by default.
+        passed to the other store in methods like 'copy_to'. Returning
+        None will filter out this track. This is the identity function by default.
         """
         return directory.clone()
     
-    def absolutize_directory(self, directory: Directory) -> Directory:
+    def absolutize_directory(self, directory: Directory, opts: Options) -> Optional[Directory]:
         """
         Outputs an 'absolute' variant of the directory for 'import',
         passed to the this store in methods like 'copy_to'. This is the
-        identity function by default.
+        None will filter out this track. This is the identity function by default.
         """
         return directory.clone()
 
