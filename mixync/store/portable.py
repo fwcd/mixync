@@ -18,6 +18,16 @@ class PortableStore(Store):
         self.make_session = sessionmaker(bind=self.engine)
 
         self._create_tables()
+
+    @staticmethod
+    def parse_ref(ref: str):
+        try:
+            path = Path(ref)
+            if path.name.endswith('.mixxxlib'):
+                return PortableStore(path)
+        except:
+            pass
+        return None
     
     def _create_tables(self):
         Base.metadata.create_all(self.engine, checkfirst=True)

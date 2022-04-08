@@ -11,10 +11,12 @@ STORES = [
 
 def parse_ref(ref: str) -> Store:
     for store_cls in STORES:
-        store = store_cls.parse(ref)
+        store = store_cls.parse_ref(ref)
         if store:
             return store
-    raise ValueError(f"Could not parse ref '{ref}'")
+
+    print(f"Could not parse ref '{ref}'!")
+    exit(1)
 
 def main():
     parser = argparse.ArgumentParser(description='Tool for copying Mixxx databases with tracks in a portable manner')
@@ -22,6 +24,10 @@ def main():
     parser.add_argument('dest', help='The destination ref (to be copied to)')
 
     args = parser.parse_args()
+
+    if args.source == args.dest:
+        print('Source and destination identical, doing nothing.')
+        exit(0)
 
     source = parse_ref(args.source)
     dest = parse_ref(args.dest)

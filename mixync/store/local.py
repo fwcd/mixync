@@ -31,6 +31,18 @@ class LocalStore(Store):
         engine = create_engine(f'sqlite:///{path}')
         self.make_session = sessionmaker(bind=engine)
     
+    @staticmethod
+    def parse_ref(ref: str):
+        if ref == '@local':
+            return LocalStore()
+        try:
+            path = Path(ref)
+            if path.name == 'mixxxdb.sqlite':
+                return LocalStore(path)
+        except:
+            pass
+        return None
+
     def _query_all(self, *args, **kwargs) -> list:
         with self.make_session() as session:
             for row in session.query(*args, **kwargs):

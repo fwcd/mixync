@@ -26,7 +26,7 @@ class Store:
                 print(f'==> Copied {location.filename} ({len(raw)} bytes)')
     
     @classmethod
-    def parse(cls, ref: str):
+    def parse_ref(cls, ref: str):
         raise NotImplementedError(f'parse is not implemented for {cls.__name__}!')
 
     def tracks(self) -> list[Track]:
