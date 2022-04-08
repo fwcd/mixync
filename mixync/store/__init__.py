@@ -4,6 +4,7 @@ from mixync.model.directory import Directory
 from mixync.model.track import Track
 from mixync.model.track_location import TrackLocation
 from mixync.utils.progress import ProgressLine
+from mixync.utils.str import truncate
 
 class Store:
     """A store interface for music and metadata, e.g. a local mixxxdb or a remote server."""
@@ -41,7 +42,7 @@ class Store:
                 raw = self.download_track(location.location)
                 other.upload_track(dest_location.location, raw)
                 if log:
-                    progress.print(f"Copied '{location.filename}' ({len(raw) / 1_000_000} MB)")
+                    progress.print(f"Copied '{truncate(location.filename, 40)}' ({len(raw) / 1_000_000} MB)")
         if log:
             print(f'==> Copied {len(locations)} track files')
     
