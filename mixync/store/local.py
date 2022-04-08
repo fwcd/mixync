@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker, make_transient
 from pathlib import Path
 from typing import Iterator, Type, TypeVar
 
+from mixync.model.directory import *
 from mixync.model.track import *
 from mixync.model.track_location import *
 from mixync.store import Store
@@ -53,12 +54,25 @@ class LocalStore(Store):
                 row.id = None
                 yield row
     
+    def _find_directory(self, path: Path) -> Path:
+        for dir in self._query_all(Directory):
+            dir_path = Path(dir.directory)
+            if path.is_relative_to(dir_path):
+                return dir_path
+        return path.parent
+
+    def relativize_directory(self, directory: Directory) -> Directory:
+        rel = directory.clone()
+        rel.directory = Path(rel.directory).name
+        return rel
+
     def relativize_track_location(self, track_location: TrackLocation) -> TrackLocation:
         rel = track_location.clone()
-        # Relativize paths
-        directory = Path(rel.directory)
-        rel.directory = directory.name
-        rel.location = Path(rel.location).relative_to(directory.parent).as_posix()
+        # Relativize w.r.t a base directory from the db and POSIX-ify paths
+        location = Path(rel.location)
+        directory = self._find_directory(location)
+        rel.directory = rel.directory.name
+        rel.location = location.relative_to(directory).as_posix()
         return rel
 
     def tracks(self) -> list[Track]:
