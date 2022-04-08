@@ -26,11 +26,17 @@ class Store:
             print(f'==> Copied {len(locations)} track locations')
 
         # Copy actual track files
-        for location, dest_location in zip(locations, dest_locations):
+        last_msg = ''
+        msg = ''
+        for i, (location, dest_location) in enumerate(zip(locations, dest_locations)):
             raw = self.download_track(location.location)
             other.upload_track(dest_location.location, raw)
             if log:
-                print(f'==> Copied {location.filename} ({len(raw)} bytes)')
+                last_msg = msg
+                msg = f'\r[{i + 1}/{len(locations)}] Copied {location.filename} ({len(raw)} bytes)'
+                print(msg + ' ' * (len(last_msg) - len(msg)), end='', flush=True)
+        if log:
+            print(f'\n==> Copied {len(locations)} track files')
     
     @classmethod
     def parse_ref(cls, ref: str):
