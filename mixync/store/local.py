@@ -59,6 +59,8 @@ class LocalStore(Store):
         directories = [Path(dir.directory) for dir in self._query_all(Directory)]
 
         # Add some default directories as fallback
+        # TODO: We should put these extra directories into a constant so
+        #       they can later be used to absolutize these directories again
         directories += [Path.home() / 'Music', Path.home() / 'Downloads']
 
         # Try to find the base directory among the stored directories
