@@ -1,10 +1,13 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, make_transient
 from pathlib import Path
+from typing import Iterator, Type, TypeVar
 
 from mixync.model.track import *
 from mixync.model.track_location import *
 from mixync.store import Store
+
+T = TypeVar('T')
 
 MIXXXDIR_PATHS = [
     # Linux
@@ -43,19 +46,26 @@ class LocalStore(Store):
             pass
         return None
 
-    def _query_all(self, *args, **kwargs) -> list:
+    def _query_all(self, cls: Type[T]) -> Iterator[T]:
         with self.make_session() as session:
-            for row in session.query(*args, **kwargs):
+            for row in session.query(cls):
                 make_transient(row)
                 row.id = None
                 yield row
     
+    def _query_track_locations(self) -> Iterator[TrackLocation]:
+        for row in self._query_all(TrackLocation):
+            if not row.fs_deleted:
+                # Relativize paths
+                directory = Path(row.directory)
+                row.directory = directory.name
+                row.location = Path(row.location).relative_to(directory.parent).as_posix()
+                yield row
+
     def tracks(self) -> list[Track]:
         return list(self._query_all(Track))
     
-    # TODO: Relativize paths and filter out deleted locations
-
     def track_locations(self) -> list[TrackLocation]:
-        return list(self._query_all(TrackLocation))
+        return list(self._query_track_locations())
     
     # TODO: Update methods
