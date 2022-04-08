@@ -25,7 +25,7 @@ class Store:
         # Copy directory metadata
         directories = self.directories()
         rel_directories = [self.relativize_directory(d, opts) for d in directories]
-        dest_directories = [other.absolutize_directory(d, opts) for d in rel_directories]
+        dest_directories = [other.absolutize_directory(d, opts) if d else None for d in rel_directories]
         updated_directories = [d for d in dest_directories if d]
         other.update_directories(updated_directories)
         if opts.log:
@@ -34,7 +34,7 @@ class Store:
         # Copy track location metadata
         locations = self.track_locations()
         rel_locations = [self.relativize_track_location(l, opts) for l in locations]
-        dest_locations = [other.absolutize_track_location(l, opts) for l in rel_locations]
+        dest_locations = [other.absolutize_track_location(l, opts) if l else None for l in rel_locations]
         updated_locations = [l for l in dest_locations if l]
         other.update_track_locations(updated_locations)
         if opts.log:

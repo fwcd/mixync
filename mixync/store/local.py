@@ -56,21 +56,16 @@ class LocalStore(Store):
                 row.id = None
                 yield row
     
-    def _find_base_directory(self, path: Path) -> Optional[Path]:
+    def _find_base_directory(self, path: Path, opts: Options) -> Optional[Path]:
         directories = [Path(dir.directory) for dir in self._query_all(Directory)]
-
-        # Add some default directories as fallback
-        # TODO: We should put these extra directories into a constant so
-        #       they can later be used to absolutize these directories again
-        directories += [Path.home() / 'Music', Path.home() / 'Downloads']
 
         # Try to find the base directory among the stored directories
         for directory in directories:
             if path.is_relative_to(directory):
                 return directory
 
-        # Fall back to the parent if no other base directory is found
-        return path.parent
+        # If not skip_uncategorized, use the parent directory
+        return None if opts.skip_uncategorized else path.parent
 
     def relativize_directory(self, directory: Directory, opts: Options) -> Optional[Directory]:
         # TODO: Handle case where user may have multiple directories with same name?
@@ -82,7 +77,9 @@ class LocalStore(Store):
         rel = track_location.clone()
         # Relativize w.r.t a base directory from the db and POSIX-ify paths
         location = Path(rel.location)
-        base_directory = self._find_base_directory(location)
+        base_directory = self._find_base_directory(location, opts)
+        if not base_directory:
+            return None
         rel_location = location.relative_to(base_directory.parent)
         rel.location = rel_location.as_posix()
         rel.directory = rel_location.parent.as_posix()
