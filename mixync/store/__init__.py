@@ -18,6 +18,14 @@ class Store:
         other.update_tracks(tracks)
         if log:
             print(f'==> Copied {len(tracks)} tracks')
+        
+        # Copy directory metadata
+        directories = self.directories()
+        rel_directories = [self.relativize_directory(d) for d in directories]
+        dest_directories = [other.absolutize_directory(d) for d in rel_directories]
+        other.update_directories(dest_directories)
+        if log:
+            print(f'==> Copied {len(directories)} directories')
 
         # Copy track location metadata
         locations = self.track_locations()
