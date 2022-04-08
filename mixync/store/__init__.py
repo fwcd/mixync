@@ -3,13 +3,14 @@ from __future__ import annotations
 from mixync.model.directory import Directory
 from mixync.model.track import Track
 from mixync.model.track_location import TrackLocation
+from mixync.options import Options
 from mixync.utils.progress import ProgressLine
 from mixync.utils.str import truncate
 
 class Store:
     """A store interface for music and metadata, e.g. a local mixxxdb or a remote server."""
 
-    def copy_to(self, other: Store, log: bool=False):
+    def copy_to(self, other: Store, opts: Options):
         """Copies the contents of this store to the given other store."""
 
         # TODO: Deltas?
@@ -17,7 +18,7 @@ class Store:
         # Copy track metadata
         tracks = self.tracks()
         other.update_tracks(tracks)
-        if log:
+        if opts.log:
             print(f'==> Copied {len(tracks)} tracks')
         
         # Copy directory metadata
@@ -25,7 +26,7 @@ class Store:
         rel_directories = [self.relativize_directory(d) for d in directories]
         dest_directories = [other.absolutize_directory(d) for d in rel_directories]
         other.update_directories(dest_directories)
-        if log:
+        if opts.log:
             print(f'==> Copied {len(directories)} directories')
 
         # Copy track location metadata
@@ -33,17 +34,17 @@ class Store:
         rel_locations = [self.relativize_track_location(l) for l in locations]
         dest_locations = [other.absolutize_track_location(l) for l in rel_locations]
         other.update_track_locations(dest_locations)
-        if log:
+        if opts.log:
             print(f'==> Copied {len(locations)} track locations')
 
         # Copy actual track files
-        with ProgressLine(len(locations), final_newline=log) as progress:
+        with ProgressLine(len(locations), final_newline=opts.log) as progress:
             for location, dest_location in zip(locations, dest_locations):
                 raw = self.download_track(location.location)
                 other.upload_track(dest_location.location, raw)
-                if log:
+                if opts.log:
                     progress.print(f"Copied '{truncate(location.filename, 40)}' ({len(raw) / 1_000_000} MB)")
-        if log:
+        if opts.log:
             print(f'==> Copied {len(locations)} track files')
     
     @classmethod

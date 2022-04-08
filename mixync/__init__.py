@@ -1,5 +1,6 @@
 import argparse
 
+from mixync.options import Options
 from mixync.store import Store
 from mixync.store.local import LocalStore
 from mixync.store.portable import PortableStore
@@ -31,5 +32,8 @@ def main():
 
     source = parse_ref(args.source)
     dest = parse_ref(args.dest)
+    opts = Options(
+        log=True
+    )
 
-    source.copy_to(dest, log=True)
+    source.copy_to(dest, opts=opts)
