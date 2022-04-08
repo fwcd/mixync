@@ -6,10 +6,28 @@ from mixync.model.track import *
 from mixync.model.track_location import *
 from mixync.store import Store
 
+MIXXXDIR_PATHS = [
+    # Linux
+    Path.home() / '.mixxx',
+    # macOS
+    Path.home() / 'Library' / 'Containers' / 'org.mixxx.mixxx' / 'Data' / 'Library' / 'Application Support' / 'Mixxx',
+    Path.home() / 'Library' / 'Application Support' / 'Mixxx',
+    # Windows
+    Path.home() / 'AppData' / 'Local' / 'Mixxx',
+]
+
+def find_local_mixxxdir() -> Path:
+    for path in MIXXXDIR_PATHS:
+        if path.is_dir():
+            return path
+    return None
+
+LOCAL_MIXXXDB_PATH = find_local_mixxxdir() / 'mixxxdb.sqlite'
+
 class LocalStore(Store):
     """A wrapper around the user's local mixxxdb."""
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Path=LOCAL_MIXXXDB_PATH):
         engine = create_engine(f'sqlite:///{path}')
         self.make_session = sessionmaker(bind=engine)
     

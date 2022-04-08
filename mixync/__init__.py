@@ -1,52 +1,29 @@
 import argparse
 
-from pathlib import Path
-
-from mixync.context import Context
-from mixync.command.push import perform_push
-from mixync.command.pull import perform_pull
+from mixync.store import Store
 from mixync.store.local import LocalStore
 from mixync.store.portable import PortableStore
 
-COMMANDS = {
-    'push': perform_push,
-    'pull': perform_pull,
-}
-
-MIXXXDIR_PATHS = [
-    # Linux
-    Path.home() / '.mixxx',
-    # macOS
-    Path.home() / 'Library' / 'Containers' / 'org.mixxx.mixxx' / 'Data' / 'Library' / 'Application Support' / 'Mixxx',
-    Path.home() / 'Library' / 'Application Support' / 'Mixxx',
-    # Windows
-    Path.home() / 'AppData' / 'Local' / 'Mixxx',
+STORES = [
+    LocalStore,
+    PortableStore
 ]
 
-def find_local_mixxxdir() -> Path:
-    for path in MIXXXDIR_PATHS:
-        if path.is_dir():
-            return path
-    return None
+def parse_ref(ref: str) -> Store:
+    for store_cls in STORES:
+        store = store_cls.parse(ref)
+        if store:
+            return store
+    raise ValueError(f"Could not parse ref '{ref}'")
 
 def main():
-    local_mixxxdb = find_local_mixxxdir() / 'mixxxdb.sqlite'
-
     parser = argparse.ArgumentParser(description='Tool for copying Mixxx databases with tracks in a portable manner')
-    parser.add_argument('--local', default=local_mixxxdb, required=local_mixxxdb == None, help='The path to the local mixxxdb.sqlite.')
-    parser.add_argument('--dry-run', action='store_true', help='Whether to only simulate a run without copying or changing any files.')
-    parser.add_argument('command', choices=sorted(COMMANDS.keys()), help='The command to perform.')
-    parser.add_argument('portable', help='The path or URL to the (possibly remote) *.mixxxlib directory (will be created if not exists).')
+    parser.add_argument('source', help='The source ref (to be copied from)')
+    parser.add_argument('dest', help='The destination ref (to be copied to)')
 
     args = parser.parse_args()
 
-    command = COMMANDS[args.command]
-    local_path = Path(args.local)
-    portable_path = Path(args.portable)
+    source = parse_ref(args.source)
+    dest = parse_ref(args.dest)
 
-    context = Context(
-        local_store=LocalStore(local_path),
-        portable_store=PortableStore(portable_path)
-    )
-
-    command(context)
+    source.copy_to(dest)

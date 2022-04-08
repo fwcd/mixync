@@ -24,6 +24,10 @@ class Store:
             other.upload_track(location, raw)
             if log:
                 print(f'==> Copied {location.filename} ({len(raw)} bytes)')
+    
+    @classmethod
+    def parse(cls, ref: str):
+        raise NotImplementedError(f'parse is not implemented for {cls.__name__}!')
 
     def tracks(self) -> list[Track]:
         """Fetches the tracks (metadata only) from this store."""
@@ -35,22 +39,22 @@ class Store:
     
     def update_tracks(self, tracks: list[Track]):
         """Merges the given tracks (metadata only) into the store."""
-        raise NotImplementedError('update_tracks is not implemented!')
+        raise NotImplementedError(f'update_tracks is not implemented for {type(self).__name__}!')
 
     def update_track_locations(self, track_locations: list[TrackLocation]):
         """Merges the given track locations into the store."""
-        raise NotImplementedError('update_track_locations is not implemented!')
+        raise NotImplementedError(f'update_track_locations is not implemented for {type(self).__name__}!')
 
     def upload_track(self, location: str, raw: bytes):
         """
         Uploads a track from a TrackLocation as returned by
         track_locations from an in-memory buffer.
         """
-        raise NotImplementedError('upload_track is not implemented!')
+        raise NotImplementedError(f'upload_track is not implemented for {type(self).__name__}!')
 
     def download_track(self, location: TrackLocation) -> bytes:
         """
         Downloads a track from a TrackLocation as returned by
         track_locations to an in-memory buffer.
         """
-        raise NotImplementedError('download_track is not implemented!')
+        raise NotImplementedError(f'download_track is not implemented for {type(self).__name__}!')
