@@ -6,7 +6,7 @@ from mixync.store.portable import PortableStore
 
 STORES = [
     LocalStore,
-    PortableStore
+    PortableStore,
 ]
 
 def parse_ref(ref: str) -> Store:
