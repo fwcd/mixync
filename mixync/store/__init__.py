@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from mixync.model.track import Track
 from mixync.model.track_location import TrackLocation
+from mixync.utils.progress import ProgressLine
 
 class Store:
     """A store interface for music and metadata, e.g. a local mixxxdb or a remote server."""
@@ -26,17 +27,14 @@ class Store:
             print(f'==> Copied {len(locations)} track locations')
 
         # Copy actual track files
-        last_msg = ''
-        msg = ''
-        for i, (location, dest_location) in enumerate(zip(locations, dest_locations)):
-            raw = self.download_track(location.location)
-            other.upload_track(dest_location.location, raw)
-            if log:
-                last_msg = msg
-                msg = f'\r[{i + 1}/{len(locations)}] Copied {location.filename} ({len(raw)} bytes)'
-                print(msg + ' ' * (len(last_msg) - len(msg)), end='', flush=True)
+        with ProgressLine(len(locations), final_newline=log) as progress:
+            for i, (location, dest_location) in enumerate(zip(locations, dest_locations)):
+                raw = self.download_track(location.location)
+                other.upload_track(dest_location.location, raw)
+                if log:
+                    progress.print(f"Copied '{location.filename}' ({len(raw) / 1_000_000} MB)")
         if log:
-            print(f'\n==> Copied {len(locations)} track files')
+            print(f'==> Copied {len(locations)} track files')
     
     @classmethod
     def parse_ref(cls, ref: str):
