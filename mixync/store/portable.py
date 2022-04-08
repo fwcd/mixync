@@ -70,7 +70,8 @@ class PortableStore(Store):
     
     def update_directories(self, directories: list[Directory]):
         with self.make_session() as session:
-            session.add_all(directories)
+            for directory in directories:
+                session.merge(directory)
             session.commit()
     
     def download_track(self, location: str) -> bytes:

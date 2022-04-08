@@ -79,10 +79,10 @@ class LocalStore(Store):
         rel = track_location.clone()
         # Relativize w.r.t a base directory from the db and POSIX-ify paths
         location = Path(rel.location)
-        directory = Path(rel.directory)
         base_directory = self._find_base_directory(location)
-        rel.directory = directory.name
-        rel.location = location.relative_to(base_directory.parent).as_posix()
+        rel_location = location.relative_to(base_directory.parent)
+        rel.location = rel_location.as_posix()
+        rel.directory = rel_location.parent.as_posix()
         return rel
     
     def directories(self) -> list[Directory]:
