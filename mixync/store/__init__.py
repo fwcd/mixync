@@ -28,7 +28,7 @@ class Store:
 
         # Copy actual track files
         with ProgressLine(len(locations), final_newline=log) as progress:
-            for i, (location, dest_location) in enumerate(zip(locations, dest_locations)):
+            for location, dest_location in zip(locations, dest_locations):
                 raw = self.download_track(location.location)
                 other.upload_track(dest_location.location, raw)
                 if log:
