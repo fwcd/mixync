@@ -14,7 +14,11 @@ def dict_convertible(cls):
     def to_dict(self) -> dict:
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
     
+    def clone(self):
+        return type(self).from_dict(self.to_dict())
+
     cls.from_dict = from_dict
     cls.to_dict = to_dict
+    cls.clone = clone
 
     return cls

@@ -53,19 +53,26 @@ class LocalStore(Store):
                 row.id = None
                 yield row
     
-    def _query_track_locations(self) -> Iterator[TrackLocation]:
-        for row in self._query_all(TrackLocation):
-            if not row.fs_deleted:
-                # Relativize paths
-                directory = Path(row.directory)
-                row.directory = directory.name
-                row.location = Path(row.location).relative_to(directory.parent).as_posix()
-                yield row
+    def relativize_track_location(self, track_location: TrackLocation) -> TrackLocation:
+        rel = track_location.clone()
+        # Relativize paths
+        directory = Path(rel.directory)
+        rel.directory = directory.name
+        rel.location = Path(rel.location).relative_to(directory.parent).as_posix()
+        return rel
 
     def tracks(self) -> list[Track]:
         return list(self._query_all(Track))
     
     def track_locations(self) -> list[TrackLocation]:
-        return list(self._query_track_locations())
+        return list(l for l in self._query_all(TrackLocation) if not l.fs_deleted)
     
-    # TODO: Update methods
+    # TODO: Update methods and upload
+
+    def download_track(self, location: str) -> bytes:
+        with open(location, 'rb') as f:
+            return f.read()
+        
+    def upload_track(self, location: str, raw: bytes):
+        with open(location, 'wb') as f:
+            f.write(raw)
