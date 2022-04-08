@@ -69,7 +69,7 @@ class Store:
         """Merges the given track locations into the store."""
         raise NotImplementedError(f'update_track_locations is not implemented for {type(self).__name__}!')
 
-    def update_directories(self, track_locations: list[TrackLocation]):
+    def update_directories(self, directories: list[Directory]):
         """Merges the given music directories into the store."""
         raise NotImplementedError(f'update_directories is not implemented for {type(self).__name__}!')
     

@@ -17,7 +17,7 @@ class PortableStore(Store):
 
         db_path = path / 'mixxxdb.portable.sqlite'
         self.engine = create_engine(f'sqlite:///{db_path}')
-        self.make_session = sessionmaker(bind=self.engine)
+        self.make_session = sessionmaker(bind=self.engine, expire_on_commit=False)
 
         self._create_tables()
 
@@ -65,6 +65,12 @@ class PortableStore(Store):
                 # TODO: See note in method above about performance
                 if location.location not in visited_locations and not session.query(TrackLocation).where(TrackLocation.location == location.location).first():
                     session.add(location)
+                    visited_locations.add(location.location)
+            session.commit()
+    
+    def update_directories(self, directories: list[Directory]):
+        with self.make_session() as session:
+            session.add_all(directories)
             session.commit()
     
     def download_track(self, location: str) -> bytes:

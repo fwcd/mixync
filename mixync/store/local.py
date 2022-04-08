@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, make_transient
 from pathlib import Path
 from typing import Iterator, Type, TypeVar
+from mixync.model import directory
 
 from mixync.model.directory import *
 from mixync.model.track import *
@@ -33,7 +34,7 @@ class LocalStore(Store):
 
     def __init__(self, path: Path=LOCAL_MIXXXDB_PATH):
         engine = create_engine(f'sqlite:///{path}')
-        self.make_session = sessionmaker(bind=engine)
+        self.make_session = sessionmaker(bind=engine, expire_on_commit=False)
     
     @staticmethod
     def parse_ref(ref: str):
@@ -54,14 +55,22 @@ class LocalStore(Store):
                 row.id = None
                 yield row
     
-    def _find_directory(self, path: Path) -> Path:
-        for dir in self._query_all(Directory):
-            dir_path = Path(dir.directory)
-            if path.is_relative_to(dir_path):
-                return dir_path
+    def _find_base_directory(self, path: Path) -> Path:
+        directories = [Path(dir.directory) for dir in self._query_all(Directory)]
+
+        # Add some default directories as fallback
+        directories += [Path.home() / 'Music', Path.home() / 'Downloads']
+
+        # Try to find the base directory among the stored directories
+        for directory in directories:
+            if path.is_relative_to(directory):
+                return directory
+
+        # Fall back to the parent if no other base directory is found
         return path.parent
 
     def relativize_directory(self, directory: Directory) -> Directory:
+        # TODO: Handle case where user may have multiple directories with same name?
         rel = directory.clone()
         rel.directory = Path(rel.directory).name
         return rel
@@ -70,10 +79,14 @@ class LocalStore(Store):
         rel = track_location.clone()
         # Relativize w.r.t a base directory from the db and POSIX-ify paths
         location = Path(rel.location)
-        directory = self._find_directory(location)
-        rel.directory = rel.directory.name
-        rel.location = location.relative_to(directory).as_posix()
+        directory = Path(rel.directory)
+        base_directory = self._find_base_directory(location)
+        rel.directory = directory.name
+        rel.location = location.relative_to(base_directory.parent).as_posix()
         return rel
+    
+    def directories(self) -> list[Directory]:
+        return list(self._query_all(Directory))
 
     def tracks(self) -> list[Track]:
         return list(self._query_all(Track))
