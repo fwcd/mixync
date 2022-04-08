@@ -59,3 +59,5 @@ my-library.mixxxlib
   - track2.mp3
     ...
 ```
+
+> Note that while `mixxxdb.portable.sqlite` uses a schema that is very similar (large identical) to the actual mixxxdb, it cannot be directly copied to the `.mixxx` config directory due to the use of relative paths.
