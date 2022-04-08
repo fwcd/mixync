@@ -53,7 +53,7 @@ class LocalStore(Store):
     def tracks(self) -> list[Track]:
         return list(self._query_all(Track))
     
-    # TODO: Relativize paths
+    # TODO: Relativize paths and filter out deleted locations
 
     def track_locations(self) -> list[TrackLocation]:
         return list(self._query_all(TrackLocation))
