@@ -123,9 +123,9 @@ class MixxxStore(Store):
                         genre=track.genre,
                         comment=track.comment,
                         duration_ms=int(track.duration * 1000),
-                        tracknumber=track.tracknumber,
+                        track_number=track.tracknumber,
                         url=track.url,
-                        samplerate=track.samplerate,
+                        sample_rate=track.samplerate,
                         cues=list(Cue(
                             id=self._make_model_id(c.id),
                             type=c.type,

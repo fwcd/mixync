@@ -16,9 +16,9 @@ class Track:
     genre: str = ''
     comment: str = ''
     duration_ms: Optional[int] = None
-    tracknumber: Optional[int] = None
+    track_number: Optional[int] = None
     url: Optional[str] = None
-    samplerate: Optional[int] = None
+    sample_rate: Optional[int] = None
     # We don't need cuepoint, since that one's stored in cues too
     cues: list[Cue] = field(default_factory=lambda: [])
     bpm: Optional[float] = None
@@ -27,4 +27,4 @@ class Track:
     rating: Optional[int] = None
     key: Optional[str] = None
     color: Optional[int] = None
-    last_played_at: datetime = field(default_factory=datetime.now)
+    last_played_at: Optional[datetime] = None

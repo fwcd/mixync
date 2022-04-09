@@ -13,4 +13,3 @@ class PortableCue(Base):
     hotcue = Column(Integer, nullable=True)
     label = Column(Text, nullable=True)
     color = Column(Integer, default=0xFFFF0000, nullable=False)
-
