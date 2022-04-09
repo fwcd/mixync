@@ -68,13 +68,14 @@ class PortableStore(Store):
         return list(self._query_all(PlaylistTrack))
 
     def _merge_all(self, rows: list):
-        with self.make_session() as session:
+        with self.make_session.begin() as session:
             for row in rows:
                 session.merge(row)
-            session.commit()
+        return len(rows)
     
-    def update_tracks(self, tracks: list[Track]):
-        with self.make_session() as session:
+    def update_tracks(self, tracks: list[Track]) -> int:
+        count = 0
+        with self.make_session.begin() as session:
             for track in tracks:
                 # TODO: Find a more performant solution, perhaps involving a
                 #       unique constraint across (title, artist) on the portable
@@ -82,35 +83,39 @@ class PortableStore(Store):
                 #       (this seems to be non-trivial with the high-level ORM API though)
                 if not session.query(Track).where(Track.title == track.title, Track.artist == track.artist).first():
                     session.add(track)
-            session.commit()
+                    count += 1
+        return count
 
-    def update_track_locations(self, track_locations: list[TrackLocation]):
+    def update_track_locations(self, track_locations: list[TrackLocation]) -> int:
         visited_locations = set()
-        with self.make_session() as session:
+        with self.make_session.begin() as session:
             for location in track_locations:
                 # TODO: See note in method above about performance
                 if location.location not in visited_locations and not session.query(TrackLocation).where(TrackLocation.location == location.location).first():
                     session.add(location)
                     visited_locations.add(location.location)
-            session.commit()
+        return len(visited_locations)
     
-    def update_directories(self, directories: list[Directory]):
-        self._merge_all(directories)
+    # FIXME: We want to perform a real upsert here instead of a merge
+    #        which isn't entirely correct (e.g. cues can get duplicated)
 
-    def update_cues(self, cues: list[Cue]):
-        self._merge_all(cues)
+    def update_directories(self, directories: list[Directory]) -> int:
+        return self._merge_all(directories)
 
-    def update_crates(self, crates: list[Crate]):
-        self._merge_all(crates)
+    def update_cues(self, cues: list[Cue]) -> int:
+        return self._merge_all(cues)
 
-    def update_crate_tracks(self, crate_tracks: list[CrateTrack]):
-        self._merge_all(crate_tracks)
+    def update_crates(self, crates: list[Crate]) -> int:
+        return self._merge_all(crates)
 
-    def update_playlists(self, playlists: list[Playlist]):
-        self._merge_all(playlists)
+    def update_crate_tracks(self, crate_tracks: list[CrateTrack]) -> int:
+        return self._merge_all(crate_tracks)
 
-    def update_playlist_tracks(self, playlist_tracks: list[PlaylistTrack]):
-        self._merge_all(playlist_tracks)
+    def update_playlists(self, playlists: list[Playlist]) -> int:
+        return self._merge_all(playlists)
+
+    def update_playlist_tracks(self, playlist_tracks: list[PlaylistTrack]) -> int:
+        return self._merge_all(playlist_tracks)
     
     def download_track(self, location: str) -> bytes:
         path = self.path / location

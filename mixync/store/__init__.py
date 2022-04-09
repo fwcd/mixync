@@ -23,27 +23,27 @@ class Store:
 
         # Copy track metadata
         tracks = self.tracks()
-        other.update_tracks(tracks)
+        updated_track_count = other.update_tracks(tracks)
         if opts.log:
-            print(f'==> Copied {len(tracks)} tracks')
+            print(f'==> Copied {updated_track_count} tracks')
         
         # Copy directory metadata
         directories = self.directories()
         rel_directories = [self.relativize_directory(d, opts) for d in directories]
         dest_directories = [other.absolutize_directory(d, opts) if d else None for d in rel_directories]
         updated_directories = [d for d in dest_directories if d]
-        other.update_directories(updated_directories)
+        updated_directory_count = other.update_directories(updated_directories)
         if opts.log:
-            print(f'==> Copied {len(updated_directories)} directories')
+            print(f'==> Copied {updated_directory_count} directories')
 
         # Copy track location metadata
         locations = self.track_locations()
         rel_locations = [self.relativize_track_location(l, opts) for l in locations]
         dest_locations = [other.absolutize_track_location(l, opts) if l else None for l in rel_locations]
         updated_locations = [l for l in dest_locations if l]
-        other.update_track_locations(updated_locations)
+        updated_location_count = other.update_track_locations(updated_locations)
         if opts.log:
-            print(f'==> Copied {len(updated_locations)} track locations')
+            print(f'==> Copied {updated_location_count} track locations')
 
         # Copy actual track files
         zipped_locations = [(l, d) for l, d in zip(locations, dest_locations) if l and d]
@@ -65,18 +65,18 @@ class Store:
         # Copy playlists
         playlists = self.playlists()
         playlist_tracks = self.playlist_tracks()
-        other.update_playlists(playlists)
+        updated_playlist_count = other.update_playlists(playlists)
         other.update_playlist_tracks(playlist_tracks)
         if opts.log:
-            print(f'==> Copied {len(playlists)} playlists')
+            print(f'==> Copied {updated_playlist_count} playlists')
         
         # Copy crates
         crates = self.crates()
         crate_tracks = self.crate_tracks()
-        other.update_crates(crates)
+        updated_crate_count = other.update_crates(crates)
         other.update_crate_tracks(crate_tracks)
         if opts.log:
-            print(f'==> Copied {len(crates)} crates')
+            print(f'==> Copied {updated_crate_count} crates')
         
     
     @classmethod
@@ -119,35 +119,35 @@ class Store:
     
     # Update methods
     
-    def update_tracks(self, tracks: list[Track]):
+    def update_tracks(self, tracks: list[Track]) -> int:
         """Merges the given tracks (metadata only) into the store."""
         raise NotImplementedError(f'update_tracks is not implemented for {type(self).__name__}!')
 
-    def update_track_locations(self, track_locations: list[TrackLocation]):
+    def update_track_locations(self, track_locations: list[TrackLocation]) -> int:
         """Merges the given track locations into the store."""
         raise NotImplementedError(f'update_track_locations is not implemented for {type(self).__name__}!')
 
-    def update_directories(self, directories: list[Directory]):
+    def update_directories(self, directories: list[Directory]) -> int:
         """Merges the given music directories into the store."""
         raise NotImplementedError(f'update_directories is not implemented for {type(self).__name__}!')
 
-    def update_cues(self, cues: list[Cue]):
+    def update_cues(self, cues: list[Cue]) -> int:
         """Merges the given cues into this store."""
         raise NotImplementedError(f'update_cues is not implemented for {type(self).__name__}!')
 
-    def update_crates(self, crates: list[Crate]):
+    def update_crates(self, crates: list[Crate]) -> int:
         """Merges the given crates into this store."""
         raise NotImplementedError(f'update_crates is not implemented for {type(self).__name__}!')
 
-    def update_crate_tracks(self, crate_tracks: list[CrateTrack]):
+    def update_crate_tracks(self, crate_tracks: list[CrateTrack]) -> int:
         """Merges the given crate tracks into this store."""
         raise NotImplementedError(f'update_crate_tracks is not implemented for {type(self).__name__}!')
 
-    def update_playlists(self, playlists: list[Playlist]):
+    def update_playlists(self, playlists: list[Playlist]) -> int:
         """Merges the given playlists into this store."""
         raise NotImplementedError(f'update_playlists is not implemented for {type(self).__name__}!')
 
-    def update_playlist_tracks(self, playlist_tracks: list[PlaylistTrack]):
+    def update_playlist_tracks(self, playlist_tracks: list[PlaylistTrack]) -> int:
         """Merges the given playlist tracks into this store."""
         raise NotImplementedError(f'update_playlist_tracks is not implemented for {type(self).__name__}!')
     
