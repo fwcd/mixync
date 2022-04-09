@@ -66,6 +66,12 @@ class PortableStore(Store):
     
     def playlist_tracks(self) -> list[PlaylistTrack]:
         return list(self._query_all(PlaylistTrack))
+
+    def _merge_all(self, rows: list):
+        with self.make_session() as session:
+            for row in rows:
+                session.merge(row)
+            session.commit()
     
     def update_tracks(self, tracks: list[Track]):
         with self.make_session() as session:
@@ -89,10 +95,22 @@ class PortableStore(Store):
             session.commit()
     
     def update_directories(self, directories: list[Directory]):
-        with self.make_session() as session:
-            for directory in directories:
-                session.merge(directory)
-            session.commit()
+        self._merge_all(directories)
+
+    def update_cues(self, cues: list[Cue]):
+        self._merge_all(cues)
+
+    def update_crates(self, crates: list[Crate]):
+        self._merge_all(crates)
+
+    def update_crate_tracks(self, crate_tracks: list[CrateTrack]):
+        self._merge_all(crate_tracks)
+
+    def update_playlists(self, playlists: list[Playlist]):
+        self._merge_all(playlists)
+
+    def update_playlist_tracks(self, playlist_tracks: list[PlaylistTrack]):
+        self._merge_all(playlist_tracks)
     
     def download_track(self, location: str) -> bytes:
         path = self.path / location

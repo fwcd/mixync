@@ -110,23 +110,23 @@ class Store:
 
     def update_cues(self, cues: list[Cue]):
         """Merges the given cues into this store."""
-        return []
+        raise NotImplementedError(f'update_cues is not implemented for {type(self).__name__}!')
 
     def update_crates(self, crates: list[Crate]):
         """Merges the given crates into this store."""
-        return []
+        raise NotImplementedError(f'update_crates is not implemented for {type(self).__name__}!')
 
     def update_crate_tracks(self, crate_tracks: list[CrateTrack]):
         """Merges the given crate tracks into this store."""
-        return []
+        raise NotImplementedError(f'update_crate_tracks is not implemented for {type(self).__name__}!')
 
     def update_playlists(self, playlists: list[Playlist]):
         """Merges the given playlists into this store."""
-        return []
+        raise NotImplementedError(f'update_playlists is not implemented for {type(self).__name__}!')
 
     def update_playlist_tracks(self, playlist_tracks: list[PlaylistTrack]):
         """Merges the given playlist tracks into this store."""
-        return []
+        raise NotImplementedError(f'update_playlist_tracks is not implemented for {type(self).__name__}!')
     
     # Relativization/absolutization methods
     
