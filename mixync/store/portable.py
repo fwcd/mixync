@@ -4,6 +4,7 @@ from pathlib import Path
 
 from mixync.model import Base
 from mixync.model.crate import *
+from mixync.model.crate_track import *
 from mixync.model.cue import *
 from mixync.model.directory import *
 from mixync.model.track import *
