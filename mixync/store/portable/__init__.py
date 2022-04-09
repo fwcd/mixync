@@ -46,7 +46,7 @@ class PortableStore(Store):
     def _create_tables(self):
         Base.metadata.create_all(self.engine, checkfirst=True)
     
-    def tracks(self) -> Iterable[Track]:
+    def tracks(self, name: Optional[str]=None, artist: Optional[str]=None) -> Iterable[Track]:
         with self.make_session() as session:
             for track in session.query(PortableTrack):
                 yield Track(
@@ -80,7 +80,7 @@ class PortableStore(Store):
                     last_played_at=track.last_played_at
                 )
     
-    def crates(self) -> Iterable[Crate]:
+    def crates(self, name: Optional[str]=None) -> Iterable[Crate]:
         with self.make_session() as session:
             for crate in session.query(PortableCrate):
                 yield Crate(
@@ -92,7 +92,7 @@ class PortableStore(Store):
                     track_ids={t.track_id for t in crate.tracks}
                 )
     
-    def playlists(self) -> Iterable[Playlist]:
+    def playlists(self, name: Optional[str]=None) -> Iterable[Playlist]:
         with self.make_session() as session:
             for playlist in session.query(PortablePlaylist):
                 yield Playlist(

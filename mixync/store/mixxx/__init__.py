@@ -107,7 +107,7 @@ class MixxxStore(Store):
     
     # TODO: Use SQLAlechemy ORM relationships to model e.g. track_locations or crate_tracks
     
-    def tracks(self) -> Iterable[Track]:
+    def tracks(self, name: Optional[str]=None, artist: Optional[str]=None) -> Iterable[Track]:
         with self.make_session() as session:
             for track in session.query(MixxxTrack):
                 def sample_to_ms(s) -> int:
@@ -146,7 +146,7 @@ class MixxxStore(Store):
                         last_played_at=track.last_played_at
                     )
     
-    def crates(self) -> Iterable[Crate]:
+    def crates(self, name: Optional[str]=None) -> Iterable[Crate]:
         with self.make_session() as session:
             for crate in session.query(MixxxCrate):
                 # TODO: Proper creation/modification dates?
@@ -160,7 +160,7 @@ class MixxxStore(Store):
                     )
                 )
     
-    def playlists(self) -> Iterable[Playlist]:
+    def playlists(self, name: Optional[str]=None) -> Iterable[Playlist]:
         with self.make_session() as session:
             for playlist in session.query(MixxxPlaylist):
                 yield Playlist(

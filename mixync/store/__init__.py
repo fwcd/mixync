@@ -72,15 +72,15 @@ class Store:
     
     # Query methods
 
-    def tracks(self) -> Iterable[Track]:
+    def tracks(self, name: Optional[str]=None, artist: Optional[str]=None) -> Iterable[Track]:
         """Fetches the tracks (and cues) from this store."""
         return []
     
-    def crates(self) -> Iterable[Crate]:
+    def crates(self, name: Optional[str]=None) -> Iterable[Crate]:
         """Fetches the crates from this store."""
         return []
     
-    def playlists(self) -> Iterable[Playlist]:
+    def playlists(self, name: Optional[str]=None) -> Iterable[Playlist]:
         """Fetches the playlists from this store."""
         return []
 
