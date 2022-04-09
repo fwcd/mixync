@@ -30,10 +30,10 @@ class PortableStore(Store):
     def parse_ref(ref: str):
         try:
             path = Path(ref)
-            if path.name.endswith('.mixxxlib'):
-                return PortableStore(path)
         except:
-            pass
+            return None
+        if path.name.endswith('.mixxxlib'):
+            return PortableStore(path)
         return None
     
     def _create_tables(self):

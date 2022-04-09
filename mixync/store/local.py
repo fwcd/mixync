@@ -47,10 +47,10 @@ class LocalStore(Store):
             return LocalStore()
         try:
             path = Path(ref)
-            if path.name == 'mixxxdb.sqlite':
-                return LocalStore(path)
         except:
-            pass
+            return None
+        if path.name == 'mixxxdb.sqlite':
+            return LocalStore(path)
         return None
 
     def _query_all(self, cls: Type[T]) -> Iterator[T]:
