@@ -164,9 +164,6 @@ class PortableStore(Store):
                 count += 1
         return count
 
-    # FIXME: We want to perform a real upsert here instead of a merge
-    #        which isn't entirely correct (e.g. cues can get duplicated)
-
     def update_directories(self, directories: list[Directory]) -> int:
         count = 0
         with self.make_session.begin() as session:
