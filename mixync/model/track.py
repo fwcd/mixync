@@ -13,7 +13,7 @@ class Track(Base):
     year = Column(String(16))
     genre = Column(String(64))
     tracknumber = Column(String(3))
-    location = Column(ForeignKey('track_locations.location'))
+    location = Column(ForeignKey('track_locations.id'))
     comment = Column(String(256))
     url = Column(String(256))
     duration = Column(Float)
