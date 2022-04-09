@@ -7,7 +7,7 @@ from mixync.model.cue import Cue
 
 @dataclass
 class Track:
-    id: str = field(default_factory=lambda: str(uuid4())) # a UUID independent of Mixxx's id scheme
+    id: str = field(default_factory=lambda: str(uuid4())) # a globally unique id (e.g. UUID, SHA1, ...) independent of Mixxx's id scheme
     title: str = ''
     artist: str = ''
     location: str = ''

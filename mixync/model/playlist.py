@@ -5,7 +5,7 @@ from uuid import uuid4
 
 @dataclass
 class Playlist:
-    id: str = field(default_factory=lambda: str(uuid4())) # a UUID independent of Mixxx's id scheme
+    id: str = field(default_factory=lambda: str(uuid4())) # a globally unique id (e.g. UUID, SHA1, ...) independent of Mixxx's id scheme
     name: str = ''
     position: Optional[int] = None
     date_created: datetime = field(default_factory=lambda: datetime())

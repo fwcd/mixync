@@ -3,4 +3,4 @@ from uuid import uuid4
 
 @dataclass
 class Cue:
-    id: str = field(default_factory=lambda: str(uuid4())) # a UUID independent of Mixxx's id scheme
+    id: str = field(default_factory=lambda: str(uuid4())) # a globally unique id (e.g. UUID, SHA1, ...) independent of Mixxx's id scheme
