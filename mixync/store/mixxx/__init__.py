@@ -23,7 +23,7 @@ from mixync.store.mixxx.model.track_location import *
 from mixync.options import Options
 
 T = TypeVar('T')
-ID_HASH_BASE = random.random()
+ID_HASH_BASE = random.getrandbits(64)
 
 MIXXXDIR_PATHS = [
     # Linux
@@ -86,10 +86,10 @@ class MixxxStore(Store):
         rel_location = location.relative_to(base_directory.parent)
         return rel_location.as_posix()
     
-    def _make_model_id(id):
+    def _make_model_id(self, id):
         h = hashlib.sha1()
-        h.update(ID_HASH_BASE)
-        h.update(id)
+        h.update(str(ID_HASH_BASE).encode())
+        h.update(str(id).encode())
         return h.hexdigest()
 
     def directories(self) -> Iterable[Directory]:
