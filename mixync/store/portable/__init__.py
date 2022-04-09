@@ -14,13 +14,13 @@ from mixync.model.track_location import *
 from mixync.store import Store
 
 class PortableStore(Store):
-    """A wrapper around the portable mixxxlib."""
+    """A wrapper around the portable musiclib."""
 
     def __init__(self, path: Path):
         path.mkdir(parents=True, exist_ok=True)
         self.path = path
 
-        db_path = path / 'mixxxdb.portable.sqlite'
+        db_path = path / 'library.sqlite3'
         self.engine = create_engine(f'sqlite:///{db_path}')
         self.make_session = sessionmaker(bind=self.engine, expire_on_commit=False)
 
@@ -32,7 +32,7 @@ class PortableStore(Store):
             path = Path(ref)
         except:
             return None
-        if path.name.endswith('.mixxxlib'):
+        if path.name.endswith('.musiclib'):
             return PortableStore(path)
         return None
     
