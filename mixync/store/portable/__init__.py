@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, make_transient
 from pathlib import Path
+from typing import Iterable
 
 from mixync.model.crate import *
 from mixync.model.cue import *
@@ -8,6 +9,14 @@ from mixync.model.directory import *
 from mixync.model.playlist import *
 from mixync.model.track import *
 from mixync.store import Store
+from mixync.store.portable.model import Base
+from mixync.store.portable.model.crate import *
+from mixync.store.portable.model.crate_track import *
+from mixync.store.portable.model.cue import *
+from mixync.store.portable.model.directory import *
+from mixync.store.portable.model.playlist import *
+from mixync.store.portable.model.playlist_track import *
+from mixync.store.portable.model.track import *
 
 # FIXME: Update PortableStore to the new store interface
 
@@ -35,27 +44,71 @@ class PortableStore(Store):
         return None
     
     def _create_tables(self):
-        pass
-        # Base.metadata.create_all(self.engine, checkfirst=True)
+        Base.metadata.create_all(self.engine, checkfirst=True)
     
-    def _query_all(self, cls) -> list:
+    def tracks(self) -> Iterable[Track]:
         with self.make_session() as session:
-            for row in session.query(cls):
-                make_transient(row)
-                row.id = None
-                yield row
+            for track in session.query(PortableTrack):
+                yield Track(
+                    id=track.id,
+                    title=track.title,
+                    artist=track.artist,
+                    location=track.location,
+                    album=track.album,
+                    year=track.year,
+                    genre=track.genre,
+                    comment=track.comment,
+                    duration_ms=track.duration_ms,
+                    track_number=track.track_number,
+                    url=track.url,
+                    sample_rate=track.sample_rate,
+                    cues=[Cue(
+                        id=cue.id,
+                        type=cue.type,
+                        position_ms=cue.position_ms,
+                        length_ms=cue.length_ms,
+                        hotcue=cue.hotcue,
+                        label=cue.label,
+                        color=cue.color
+                    ) for cue in track.cues],
+                    bpm=track.bpm,
+                    channels=track.channels,
+                    times_played=track.times_played,
+                    rating=track.rating,
+                    key=track.key,
+                    color=track.color,
+                    last_played_at=track.last_played_at
+                )
     
-    def tracks(self) -> list[Track]:
-        return list(self._query_all(Track))
+    def crates(self) -> Iterable[Crate]:
+        with self.make_session() as session:
+            for crate in session.query(PortableCrate):
+                yield Crate(
+                    id=crate.id,
+                    name=crate.name,
+                    date_crated=crate.date_created,
+                    date_modified=crate.date_modified,
+                    track_ids={t.id for t in crate.tracks}
+                )
     
-    def cues(self) -> list[Cue]:
-        return list(self._query_all(Cue))
-    
-    def crates(self) -> list[Crate]:
-        return list(self._query_all(Crate))
-    
-    def playlists(self) -> list[Playlist]:
-        return list(self._query_all(Playlist))
+    def playlists(self) -> Iterable[Playlist]:
+        with self.make_session() as session:
+            for playlist in session.query(PortablePlaylist):
+                yield Playlist(
+                    id=playlist.id,
+                    name=playlist.name,
+                    date_crated=playlist.date_created,
+                    date_modified=playlist.date_modified,
+                    track_ids=[t.id for t in sorted(playlist.tracks, key=lambda t: t.position)]
+                )
+
+    def directories(self) -> Iterable[Directory]:
+        with self.make_session() as session:
+            for directory in session.query(PortableDirectory):
+                yield Directory(
+                    id=directory.id,
+                    location=directory.location
+                )
     
     def _merge_all(self, rows: list):
         with self.make_session.begin() as session:
@@ -71,8 +124,37 @@ class PortableStore(Store):
                 #       unique constraint across (title, artist) on the portable
                 #       db and ignoring when a constraint would be violated?
                 #       (this seems to be non-trivial with the high-level ORM API though)
-                if not session.query(Track).where(Track.title == track.title, Track.artist == track.artist).first():
-                    session.add(track)
+                if not session.query(PortableTrack).where(PortableTrack.title == track.title, PortableTrack.artist == track.artist).first():
+                    session.add(PortableTrack(
+                        id=track.id,
+                        title=track.title,
+                        artist=track.artist,
+                        location=track.location,
+                        album=track.album,
+                        year=track.year,
+                        genre=track.genre,
+                        comment=track.comment,
+                        duration_ms=track.duration_ms,
+                        track_number=track.track_number,
+                        url=track.url,
+                        sample_rate=track.sample_rate,
+                        cues=[PortableCue(
+                            id=cue.id,
+                            type=cue.type,
+                            position_ms=cue.position_ms,
+                            length_ms=cue.length_ms,
+                            hotcue=cue.hotcue,
+                            label=cue.label,
+                            color=cue.color
+                        ) for cue in track.cues],
+                        bpm=track.bpm,
+                        channels=track.channels,
+                        times_played=track.times_played,
+                        rating=track.rating,
+                        key=track.key,
+                        color=track.color,
+                        last_played_at=track.last_played_at
+                    ))
                     count += 1
         return count
 
@@ -81,9 +163,6 @@ class PortableStore(Store):
 
     def update_directories(self, directories: list[Directory]) -> int:
         return self._merge_all(directories)
-
-    def update_cues(self, cues: list[Cue]) -> int:
-        return self._merge_all(cues)
 
     def update_crates(self, crates: list[Crate]) -> int:
         return self._merge_all(crates)

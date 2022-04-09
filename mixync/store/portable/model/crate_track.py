@@ -1,6 +1,6 @@
 from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Text
 
-from mixync.store.mixxx.model import Base
+from mixync.store.portable.model import Base
 
 class PortableCrateTrack(Base):
     __tablename__ = 'crate_track'

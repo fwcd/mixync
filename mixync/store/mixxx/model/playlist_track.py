@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey, DateTime
 
-from mixync.model import Base
+from mixync.store.mixxx.model import Base
 
 class MixxxPlaylistTrack(Base):
     __tablename__ = 'PlaylistTracks'

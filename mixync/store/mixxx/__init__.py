@@ -88,7 +88,7 @@ class MixxxStore(Store):
         if not base_directory:
             return None
         rel_location = location.relative_to(base_directory.parent)
-        new_track.location = rel_location
+        new_track.location = rel_location.as_posix()
         return new_track
     
     def _make_model_id(self, id):
@@ -104,6 +104,8 @@ class MixxxStore(Store):
                     id=self._make_model_id(directory.directory),
                     location=directory.directory
                 )
+    
+    # TODO: Use SQLAlechemy ORM relationships to model e.g. track_locations or crate_tracks
     
     def tracks(self) -> Iterable[Track]:
         with self.make_session() as session:

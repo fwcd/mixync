@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, Float, Text, DateTime
+from sqlalchemy.orm import relationship
 
-from mixync.store.mixxx.model import Base
+from mixync.store.portable.model import Base
 
 class PortableTrack(Base):
     __tablename__ = 'track'
@@ -24,3 +25,5 @@ class PortableTrack(Base):
     key = Column(Text, nullable=True)
     color = Column(Integer, nullable=True)
     last_played_at = Column(DateTime, nullable=True)
+
+    cues = relationship('PortableCue')
