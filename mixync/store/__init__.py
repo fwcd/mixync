@@ -24,7 +24,8 @@ class Store:
         tracks = list(self.tracks())
         rel_tracks = [self.relativize_track(t, opts) for t in tracks]
         dest_tracks = [other.absolutize_track(t, opts) if t else None for t in rel_tracks]
-        updated_track_count = other.update_tracks(dest_tracks)
+        updated_tracks = [t for t in dest_tracks if t]
+        updated_track_count = other.update_tracks(updated_tracks)
         if opts.log:
             print(f'==> Copied {updated_track_count} tracks')
         

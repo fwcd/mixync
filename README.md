@@ -30,6 +30,7 @@ where `source` and `dest` are so-called _refs_, which describe a store for metad
 
 - A local mixxxdb, e.g. `@local`, `path/to/mixxxdb.sqlite`
 - A portable musiclib, e.g. `path/to/library.musiclib`
+- A debug output that prints updates just to stdout, either `@debug` or `@debugcompact`
 
 For example:
 

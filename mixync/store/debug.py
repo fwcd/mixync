@@ -14,30 +14,35 @@ from mixync.utils.str import truncate
 class DebugStore(Store):
     """A simple store that outputs updates to stdout for debugging."""
 
+    def __init__(self, compact: bool=False):
+        self.compact = compact
+
     @classmethod
     def parse_ref(cls, ref: str):
         if ref == '@debug':
-            return DebugStore()
+            return DebugStore(compact=False)
+        elif ref == '@debugcompact':
+            return DebugStore(compact=True)
         return None
     
     def update_tracks(self, tracks: list[Track]) -> int:
         for track in tracks:
-            print(track)
+            print(track.title if self.compact else track)
         return len(tracks)
 
     def update_crates(self, crates: list[Crate]) -> int:
         for crate in crates:
-            print(crate)
+            print(crate.name if self.compact else crate)
         return len(crates)
 
     def update_playlists(self, playlists: list[Playlist]) -> int:
         for playlist in playlists:
-            print(playlist)
+            print(playlist.name if self.compact else playlist)
         return len(playlists)
 
     def update_directories(self, directories: list[Directory]) -> int:
         for directory in directories:
-            print(directory)
+            print(directory.location if self.compact else directory)
         return len(directories)
 
     # Upload/download methods
