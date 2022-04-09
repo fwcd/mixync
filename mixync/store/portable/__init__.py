@@ -84,9 +84,9 @@ class PortableStore(Store):
                 yield Crate(
                     id=crate.id,
                     name=crate.name,
-                    date_crated=crate.date_created,
+                    date_created=crate.date_created,
                     date_modified=crate.date_modified,
-                    track_ids={t.id for t in crate.tracks}
+                    track_ids={t.track_id for t in crate.tracks}
                 )
     
     def playlists(self) -> Iterable[Playlist]:
@@ -95,9 +95,9 @@ class PortableStore(Store):
                 yield Playlist(
                     id=playlist.id,
                     name=playlist.name,
-                    date_crated=playlist.date_created,
+                    date_created=playlist.date_created,
                     date_modified=playlist.date_modified,
-                    track_ids=[t.id for t in sorted(playlist.tracks, key=lambda t: t.position)]
+                    track_ids=[t.track_id for t in sorted(playlist.tracks, key=lambda t: t.position)]
                 )
 
     def directories(self) -> Iterable[Directory]:
