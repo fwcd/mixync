@@ -117,46 +117,50 @@ class PortableStore(Store):
                 session.merge(row)
         return len(rows)
     
+    def _model_to_portable_id(self, session, cls, o, *constraints) -> str:
+        existing = session.query(cls).where(*constraints).first()
+        return existing.id if existing and existing.id else o.id
+    
     def update_tracks(self, tracks: list[Track]) -> int:
         count = 0
         with self.make_session.begin() as session:
             for track in tracks:
-                # TODO: Find a more performant solution, perhaps involving a
-                #       unique constraint across (title, artist) on the portable
-                #       db and ignoring when a constraint would be violated?
-                #       (this seems to be non-trivial with the high-level ORM API though)
-                if not session.query(PortableTrack).where(PortableTrack.title == track.title, PortableTrack.artist == track.artist).first():
-                    session.add(PortableTrack(
-                        id=track.id,
-                        title=track.title,
-                        artist=track.artist,
-                        location=track.location,
-                        album=track.album,
-                        year=track.year,
-                        genre=track.genre,
-                        comment=track.comment,
-                        duration_ms=track.duration_ms,
-                        track_number=track.track_number,
-                        url=track.url,
-                        sample_rate=track.sample_rate,
-                        cues=[PortableCue(
-                            id=cue.id,
-                            type=cue.type,
-                            position_ms=cue.position_ms,
-                            length_ms=cue.length_ms,
-                            hotcue=cue.hotcue,
-                            label=cue.label,
-                            color=cue.color
-                        ) for cue in track.cues],
-                        bpm=track.bpm,
-                        channels=track.channels,
-                        times_played=track.times_played,
-                        rating=track.rating,
-                        key=track.key,
-                        color=track.color,
-                        last_played_at=track.last_played_at
+                id = self._model_to_portable_id(session, PortableTrack, track, PortableTrack.title == track.title, PortableTrack.artist == track.artist)
+                session.merge(PortableTrack(
+                    id=id,
+                    title=track.title,
+                    artist=track.artist,
+                    location=track.location,
+                    album=track.album,
+                    year=track.year,
+                    genre=track.genre,
+                    comment=track.comment,
+                    duration_ms=track.duration_ms,
+                    track_number=track.track_number,
+                    url=track.url,
+                    sample_rate=track.sample_rate,
+                    
+                    bpm=track.bpm,
+                    channels=track.channels,
+                    times_played=track.times_played,
+                    rating=track.rating,
+                    key=track.key,
+                    color=track.color,
+                    last_played_at=track.last_played_at
+                ))
+                for cue in track.cues:
+                    # TODO: Delete old cues?
+                    session.merge(PortableCue(
+                        id=cue.id,
+                        type=cue.type,
+                        position_ms=cue.position_ms,
+                        length_ms=cue.length_ms,
+                        hotcue=cue.hotcue,
+                        label=cue.label,
+                        color=cue.color,
+                        track_id=id
                     ))
-                    count += 1
+                count += 1
         return count
 
     # FIXME: We want to perform a real upsert here instead of a merge
@@ -166,8 +170,9 @@ class PortableStore(Store):
         count = 0
         with self.make_session.begin() as session:
             for directory in directories:
+                id = self._model_to_portable_id(session, PortableDirectory, directory, PortableDirectory.location == directory.location)
                 session.merge(PortableDirectory(
-                    id=directory.id,
+                    id=id,
                     location=directory.location
                 ))
                 count += 1
@@ -177,16 +182,18 @@ class PortableStore(Store):
         count = 0
         with self.make_session.begin() as session:
             for crate in crates:
+                id = self._model_to_portable_id(session, PortableCrate, crate, PortableCrate.name == crate.name)
                 session.merge(PortableCrate(
-                    id=crate.id,
+                    id=id,
                     name=crate.name,
                     date_created=crate.date_created,
                     date_modified=crate.date_modified,
                     locked=crate.locked
                 ))
                 for track_id in crate.track_ids:
+                    # TODO: Delete old tracks?
                     session.merge(PortableCrateTrack(
-                        crate_id=crate.id,
+                        crate_id=id,
                         track_id=track_id
                     ))
                 count += 1
@@ -196,8 +203,9 @@ class PortableStore(Store):
         count = 0
         with self.make_session.begin() as session:
             for playlist in playlists:
+                id = self._model_to_portable_id(session, PortablePlaylist, playlist, PortablePlaylist.name == playlist.name)
                 session.merge(PortablePlaylist(
-                    id=playlist.id,
+                    id=id,
                     name=playlist.name,
                     position=playlist.position,
                     date_created=playlist.date_created,
@@ -206,6 +214,7 @@ class PortableStore(Store):
                     locked=playlist.locked
                 ))
                 for i, track_id in enumerate(playlist.track_ids):
+                    # TODO: Delete old tracks?
                     session.merge(PortablePlaylistTrack(
                         playlist_id=playlist.id,
                         track_id=track_id,
