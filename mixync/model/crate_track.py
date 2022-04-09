@@ -6,5 +6,5 @@ from mixync.model import Base, dict_convertible
 class CrateTrack(Base):
     __tablename__ = 'crate_tracks'
 
-    crate_id = Column(ForeignKey('crates.id'))
-    track_id = Column(ForeignKey('library.id'), index=True)
+    crate_id = Column(ForeignKey('crates.id'), primary_key=True)
+    track_id = Column(ForeignKey('library.id'), primary_key=True, index=True)
