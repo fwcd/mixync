@@ -4,12 +4,12 @@ from pathlib import Path
 from typing import Iterator, Optional, Type, TypeVar
 
 from mixync.store import Store
-from mixync.store.mixxx.model.crate import Crate
-from mixync.store.mixxx.model.crate_track import CrateTrack
-from mixync.store.mixxx.model.cue import Cue
+from mixync.store.mixxx.model.crate import *
+from mixync.store.mixxx.model.crate_track import *
+from mixync.store.mixxx.model.cue import *
 from mixync.store.mixxx.model.directory import *
-from mixync.store.mixxx.model.playlist import Playlist
-from mixync.store.mixxx.model.playlist_track import PlaylistTrack
+from mixync.store.mixxx.model.playlist import *
+from mixync.store.mixxx.model.playlist_track import *
 from mixync.store.mixxx.model.track import *
 from mixync.store.mixxx.model.track_location import *
 from mixync.options import Options
@@ -71,23 +71,18 @@ class MixxxStore(Store):
         # If not skip_uncategorized, use the parent directory
         return None if opts.skip_uncategorized else path.parent
 
-    def relativize_directory(self, directory: Directory, opts: Options) -> Optional[Directory]:
+    def relativize_directory_location(self, location: str, opts: Options) -> Optional[Directory]:
         # TODO: Handle case where user may have multiple directories with same name?
-        rel = directory.clone()
-        rel.directory = Path(rel.directory).name
-        return rel
+        return Path(location).name
 
-    def relativize_track_location(self, track_location: TrackLocation, opts: Options) -> Optional[TrackLocation]:
-        rel = track_location.clone()
+    def relativize_track_location(self, location: str, opts: Options) -> Optional[TrackLocation]:
         # Relativize w.r.t a base directory from the db and POSIX-ify paths
-        location = Path(rel.location)
+        location = Path(location)
         base_directory = self._find_base_directory(location, opts)
         if not base_directory:
             return None
         rel_location = location.relative_to(base_directory.parent)
-        rel.location = rel_location.as_posix()
-        rel.directory = rel_location.parent.as_posix()
-        return rel
+        return rel_location.as_posix()
     
     def directories(self) -> list[Directory]:
         return list(self._query_all(Directory))

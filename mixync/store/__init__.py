@@ -3,6 +3,7 @@ from typing import Optional
 
 from mixync.model.crate import Crate
 from mixync.model.cue import Cue
+from mixync.model.directory import Directory
 from mixync.model.playlist import Playlist
 from mixync.model.track import Track
 from mixync.options import Options
@@ -96,6 +97,10 @@ class Store:
     def playlists(self) -> list[Playlist]:
         """Fetches the playlists from this store."""
         return []
+
+    def directories(self) -> list[Directory]:
+        """Fetches the directories from this store."""
+        return []
     
     # Update methods
     
@@ -115,6 +120,10 @@ class Store:
         """Merges the given playlists into this store."""
         raise NotImplementedError(f'update_playlists is not implemented for {type(self).__name__}!')
 
+    def update_directories(self, directories: list[Directory]) -> int:
+        """Merges the given directories into this store."""
+        raise NotImplementedError(f'update_directories is not implemented for {type(self).__name__}!')
+
     # Relativization/absolutization methods
     
     def relativize_track_location(self, location: str, opts: Options) -> Optional[str]:
@@ -128,6 +137,22 @@ class Store:
     def absolutize_track_location(self, location: str, opts: Options) -> Optional[str]:
         """
         Outputs an 'absolute' variant of the track location for 'import',
+        passed to the this store in methods like 'copy_to'. Returning
+        None will filter out this track. This is the identity function by default.
+        """
+        return location
+
+    def relativize_directory_location(self, location: str, opts: Options) -> Optional[str]:
+        """
+        Outputs a 'relative' variant of the directory location for 'export',
+        passed to the other store in methods like 'copy_to'. Returning
+        None will filter out this track. This is the identity function by default.
+        """
+        return location
+    
+    def absolutize_directory_location(self, location: str, opts: Options) -> Optional[str]:
+        """
+        Outputs an 'absolute' variant of the directory location for 'import',
         passed to the this store in methods like 'copy_to'. Returning
         None will filter out this track. This is the identity function by default.
         """
