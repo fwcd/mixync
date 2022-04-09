@@ -7,6 +7,7 @@ from mixync.model.crate import *
 from mixync.model.crate_track import *
 from mixync.model.cue import *
 from mixync.model.directory import *
+from mixync.model.playlist import *
 from mixync.model.track import *
 from mixync.model.track_location import *
 from mixync.store import Store
