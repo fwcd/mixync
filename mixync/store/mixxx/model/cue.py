@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, ForeignKey, Text
 from mixync.model import Base, dict_convertible
 
 @dict_convertible
-class Cue(Base):
+class MixxxCue(Base):
     __tablename__ = 'cues'
 
     id = Column(Integer, primary_key=True)

@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Text
 from mixync.model import Base, dict_convertible
 
 @dict_convertible
-class CrateTrack(Base):
+class MixxxCrateTrack(Base):
     __tablename__ = 'crate_tracks'
 
     crate_id = Column(ForeignKey('crates.id'), primary_key=True)

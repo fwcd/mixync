@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String
 from mixync.model import Base, dict_convertible
 
 @dict_convertible
-class TrackLocation(Base):
+class MixxxTrackLocation(Base):
     __tablename__ = 'track_locations'
 
     id = Column(Integer, primary_key=True)

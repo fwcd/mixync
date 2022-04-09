@@ -61,7 +61,7 @@ class MixxxStore(Store):
                 yield row
     
     def _find_base_directory(self, path: Path, opts: Options) -> Optional[Path]:
-        directories = [Path(dir.directory) for dir in self._query_all(Directory)]
+        directories = [Path(dir.directory) for dir in self._query_all(MixxxDirectory)]
 
         # Try to find the base directory among the stored directories
         for directory in directories:
@@ -85,28 +85,28 @@ class MixxxStore(Store):
         return rel_location.as_posix()
     
     def directories(self) -> list[Directory]:
-        return list(self._query_all(Directory))
+        return list(self._query_all(MixxxDirectory))
 
     def tracks(self) -> list[Track]:
-        return list(self._query_all(Track))
+        return list(self._query_all(MixxxTrack))
     
     def track_locations(self) -> list[TrackLocation]:
-        return list(l for l in self._query_all(TrackLocation) if not l.fs_deleted)
+        return list(l for l in self._query_all(MixxxTrackLocation) if not l.fs_deleted)
 
     def cues(self) -> list[Cue]:
-        return list(self._query_all(Cue))
+        return list(self._query_all(MixxxCue))
     
     def crates(self) -> list[Crate]:
-        return list(self._query_all(Crate))
+        return list(self._query_all(MixxxCrate))
     
     def crate_tracks(self) -> list[CrateTrack]:
-        return list(self._query_all(CrateTrack))
+        return list(self._query_all(MixxxCrateTrack))
     
     def playlists(self) -> list[Playlist]:
-        return list(self._query_all(Playlist))
+        return list(self._query_all(MixxxPlaylist))
     
     def playlist_tracks(self) -> list[PlaylistTrack]:
-        return list(self._query_all(PlaylistTrack))
+        return list(self._query_all(MixxxPlaylistTrack))
     
     # TODO: Update methods and upload
 

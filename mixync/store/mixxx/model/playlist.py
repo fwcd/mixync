@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, DateTime
 from mixync.model import Base, dict_convertible
 
 @dict_convertible
-class Playlist(Base):
+class MixxxPlaylist(Base):
     __tablename__ = 'Playlists'
 
     id = Column(Integer, primary_key=True)
