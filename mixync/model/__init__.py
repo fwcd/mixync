@@ -12,7 +12,7 @@ def dict_convertible(cls):
         return obj
 
     def to_dict(self) -> dict:
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        return {c.name: getattr(self, c.name) for c in self.__tablename__.columns}
     
     def clone(self):
         return type(self).from_dict(self.to_dict())

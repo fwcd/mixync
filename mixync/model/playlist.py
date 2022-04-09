@@ -4,7 +4,7 @@ from mixync.model import Base, dict_convertible
 
 @dict_convertible
 class Playlist(Base):
-    __table__ = 'Playlists'
+    __tablename__ = 'Playlists'
 
     id = Column(Integer, primary_key=True)
     name = Column(String(48))

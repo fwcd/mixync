@@ -4,7 +4,7 @@ from mixync.model import Base, dict_convertible
 
 @dict_convertible
 class PlaylistTrack(Base):
-    __table__ = 'PlaylistTracks'
+    __tablename__ = 'PlaylistTracks'
 
     id = Column(Integer, primary_key=True)
     playlist_id = Column(ForeignKey('playlists.id'))
