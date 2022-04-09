@@ -2,13 +2,9 @@ from __future__ import annotations
 from typing import Optional
 
 from mixync.model.crate import Crate
-from mixync.model.crate_track import CrateTrack
 from mixync.model.cue import Cue
-from mixync.model.directory import Directory
 from mixync.model.playlist import Playlist
-from mixync.model.playlist_track import PlaylistTrack
 from mixync.model.track import Track
-from mixync.model.track_location import TrackLocation
 from mixync.options import Options
 from mixync.utils.progress import ProgressLine
 from mixync.utils.str import truncate
@@ -89,14 +85,6 @@ class Store:
         """Fetches the tracks (metadata only) from this store."""
         return []
     
-    def track_locations(self) -> list[TrackLocation]:
-        """Fetches the track locations from this store."""
-        return []
-    
-    def directories(self) -> list[Directory]:
-        """Fetches the music directories from this store."""
-        return []
-    
     def cues(self) -> list[Cue]:
         """Fetches the cues from this store."""
         return []
@@ -105,16 +93,8 @@ class Store:
         """Fetches the crates from this store."""
         return []
     
-    def crate_tracks(self) -> list[CrateTrack]:
-        """Fetches the crate tracks from this store."""
-        return []
-    
     def playlists(self) -> list[Playlist]:
         """Fetches the playlists from this store."""
-        return []
-    
-    def playlist_tracks(self) -> list[PlaylistTrack]:
-        """Fetches the playlist tracks from this store."""
         return []
     
     # Update methods
@@ -122,14 +102,6 @@ class Store:
     def update_tracks(self, tracks: list[Track]) -> int:
         """Merges the given tracks (metadata only) into the store."""
         raise NotImplementedError(f'update_tracks is not implemented for {type(self).__name__}!')
-
-    def update_track_locations(self, track_locations: list[TrackLocation]) -> int:
-        """Merges the given track locations into the store."""
-        raise NotImplementedError(f'update_track_locations is not implemented for {type(self).__name__}!')
-
-    def update_directories(self, directories: list[Directory]) -> int:
-        """Merges the given music directories into the store."""
-        raise NotImplementedError(f'update_directories is not implemented for {type(self).__name__}!')
 
     def update_cues(self, cues: list[Cue]) -> int:
         """Merges the given cues into this store."""
@@ -139,65 +111,39 @@ class Store:
         """Merges the given crates into this store."""
         raise NotImplementedError(f'update_crates is not implemented for {type(self).__name__}!')
 
-    def update_crate_tracks(self, crate_tracks: list[CrateTrack]) -> int:
-        """Merges the given crate tracks into this store."""
-        raise NotImplementedError(f'update_crate_tracks is not implemented for {type(self).__name__}!')
-
     def update_playlists(self, playlists: list[Playlist]) -> int:
         """Merges the given playlists into this store."""
         raise NotImplementedError(f'update_playlists is not implemented for {type(self).__name__}!')
 
-    def update_playlist_tracks(self, playlist_tracks: list[PlaylistTrack]) -> int:
-        """Merges the given playlist tracks into this store."""
-        raise NotImplementedError(f'update_playlist_tracks is not implemented for {type(self).__name__}!')
-    
     # Relativization/absolutization methods
     
-    def relativize_track_location(self, track_location: TrackLocation, opts: Options) -> Optional[TrackLocation]:
+    def relativize_track_location(self, location: str, opts: Options) -> Optional[str]:
         """
         Outputs a 'relative' variant of the track location for 'export',
         passed to the other store in methods like 'copy_to'. Returning
         None will filter out this track. This is the identity function by default.
         """
-        return track_location.clone()
+        return location
     
-    def absolutize_track_location(self, track_location: TrackLocation, opts: Options) -> Optional[TrackLocation]:
+    def absolutize_track_location(self, location: str, opts: Options) -> Optional[str]:
         """
         Outputs an 'absolute' variant of the track location for 'import',
         passed to the this store in methods like 'copy_to'. Returning
         None will filter out this track. This is the identity function by default.
         """
-        return track_location.clone()
+        return location
 
-    def relativize_directory(self, directory: Directory, opts: Options) -> Optional[Directory]:
-        """
-        Outputs a 'relative' variant of the directory for 'export',
-        passed to the other store in methods like 'copy_to'. Returning
-        None will filter out this track. This is the identity function by default.
-        """
-        return directory.clone()
-    
-    def absolutize_directory(self, directory: Directory, opts: Options) -> Optional[Directory]:
-        """
-        Outputs an 'absolute' variant of the directory for 'import',
-        passed to the this store in methods like 'copy_to'. This is the
-        None will filter out this track. This is the identity function by default.
-        """
-        return directory.clone()
-    
     # Upload/download methods
 
     def upload_track(self, location: str, raw: bytes):
         """
-        Uploads a track from a TrackLocation.location as returned by
-        track_locations from an in-memory buffer.
+        Uploads a track from a track location from an in-memory buffer.
         """
         raise NotImplementedError(f'upload_track is not implemented for {type(self).__name__}!')
 
     def download_track(self, location: str) -> bytes:
         """
-        Downloads a track from a TrackLocation.location as returned by
-        track_locations to an in-memory buffer.
+        Downloads a track from a track location to an in-memory buffer.
         """
         raise NotImplementedError(f'download_track is not implemented for {type(self).__name__}!')
     
