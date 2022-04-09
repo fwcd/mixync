@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text
 
-from mixync.store.mixxx.model import Base, dict_convertible
+from mixync.store.mixxx.model import Base
 
-@dict_convertible
 class MixxxCrateTrack(Base):
     __tablename__ = 'crate_tracks'
 

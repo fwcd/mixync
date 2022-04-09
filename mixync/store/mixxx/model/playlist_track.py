@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, DateTime
 
-from mixync.store.mixxx.model import Base, dict_convertible
+from mixync.model import Base
 
-@dict_convertible
 class MixxxPlaylistTrack(Base):
     __tablename__ = 'PlaylistTracks'
 

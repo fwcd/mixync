@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, Text
 
-from mixync.store.mixxx.model import Base, dict_convertible
+from mixync.store.mixxx.model import Base
 
-@dict_convertible
 class MixxxCue(Base):
     __tablename__ = 'cues'
 
