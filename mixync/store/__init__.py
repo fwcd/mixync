@@ -19,6 +19,8 @@ class Store:
         """Copies the contents of this store to the given other store."""
 
         # TODO: Deltas?
+        # TODO: Add methods for matching tracks to existing tracks in the DB
+        #       at the store level? Perhaps just more fine grained query methods?
 
         # Copy track metadata
         tracks = list(self.tracks())
