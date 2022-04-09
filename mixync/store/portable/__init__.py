@@ -19,7 +19,7 @@ from mixync.store.portable.model.playlist_track import *
 from mixync.store.portable.model.track import *
 
 class PortableStore(Store):
-    """A wrapper around the portable musiclib."""
+    """A wrapper around a portable musiclib."""
 
     def __init__(self, path: Path):
         path.mkdir(parents=True, exist_ok=True)
