@@ -1,4 +1,6 @@
 from __future__ import annotations
+from copy import deepcopy
+from pathlib import Path
 from typing import Optional, Iterable
 
 from mixync.model.crate import Crate
@@ -20,7 +22,9 @@ class Store:
 
         # Copy track metadata
         tracks = list(self.tracks())
-        updated_track_count = other.update_tracks(tracks)
+        rel_tracks = [self.relativize_track(t, opts) for t in tracks]
+        dest_tracks = [other.absolutize_track(t, opts) if t else None for t in rel_tracks]
+        updated_track_count = other.update_tracks(dest_tracks)
         if opts.log:
             print(f'==> Copied {updated_track_count} tracks')
         
@@ -33,31 +37,18 @@ class Store:
         if opts.log:
             print(f'==> Copied {updated_directory_count} directories')
 
-        # Copy track location metadata
-        locations = list(self.track_locations())
-        rel_locations = [self.relativize_track_location(l, opts) for l in locations]
-        dest_locations = [other.absolutize_track_location(l, opts) if l else None for l in rel_locations]
-        updated_locations = [l for l in dest_locations if l]
-        updated_location_count = other.update_track_locations(updated_locations)
-        if opts.log:
-            print(f'==> Copied {updated_location_count} track locations')
-
         # Copy actual track files
-        zipped_locations = [(l, d) for l, d in zip(locations, dest_locations) if l and d]
-        with ProgressLine(len(zipped_locations), final_newline=opts.log) as progress:
-            for location, dest_location in zipped_locations:
-                raw = self.download_track(location.location)
-                other.upload_track(dest_location.location, raw)
+        zipped_tracks = [(t, d) for t, d in zip(tracks, dest_tracks) if t and d]
+        with ProgressLine(len(zipped_tracks), final_newline=opts.log) as progress:
+            for track, dest_track in zipped_tracks:
+                location = track.location
+                dest_location = dest_track.location
+                raw = self.download_track(location)
+                other.upload_track(dest_location, raw)
                 if opts.log:
-                    progress.print(f"Copied '{truncate(location.filename, 40)}' ({len(raw) / 1_000_000} MB)")
+                    progress.print(f"Copied '{truncate(Path(location).name, 40)}' ({len(raw) / 1_000_000} MB)")
         if opts.log:
-            print(f'==> Copied {len(zipped_locations)} track files')
-        
-        # Copy cue metadata
-        cues = list(self.cues())
-        other.update_cues(cues)
-        if opts.log:
-            print(f'==> Copied {len(cues)} cues')
+            print(f'==> Copied {len(zipped_tracks)} track files')
         
         # Copy playlists
         playlists = list(self.playlists())
@@ -114,37 +105,37 @@ class Store:
 
     # Relativization/absolutization methods
     
-    def relativize_track_location(self, location: str, opts: Options) -> Optional[str]:
+    def relativize_track(self, track: Track, opts: Options) -> Optional[Track]:
         """
         Outputs a 'relative' variant of the track location for 'export',
         passed to the other store in methods like 'copy_to'. Returning
         None will filter out this track. This is the identity function by default.
         """
-        return location
+        return deepcopy(track)
     
-    def absolutize_track_location(self, location: str, opts: Options) -> Optional[str]:
+    def absolutize_track(self, track: Track, opts: Options) -> Optional[Track]:
         """
         Outputs an 'absolute' variant of the track location for 'import',
         passed to the this store in methods like 'copy_to'. Returning
         None will filter out this track. This is the identity function by default.
         """
-        return location
+        return deepcopy(track)
 
-    def relativize_directory_location(self, location: str, opts: Options) -> Optional[str]:
+    def relativize_directory(self, directory: Directory, opts: Options) -> Optional[Directory]:
         """
         Outputs a 'relative' variant of the directory location for 'export',
         passed to the other store in methods like 'copy_to'. Returning
         None will filter out this track. This is the identity function by default.
         """
-        return location
+        return deepcopy(directory)
     
-    def absolutize_directory_location(self, location: str, opts: Options) -> Optional[str]:
+    def absolutize_directory(self, directory: Directory, opts: Options) -> Optional[Directory]:
         """
         Outputs an 'absolute' variant of the directory location for 'import',
         passed to the this store in methods like 'copy_to'. Returning
         None will filter out this track. This is the identity function by default.
         """
-        return location
+        return deepcopy(directory)
 
     # Upload/download methods
 

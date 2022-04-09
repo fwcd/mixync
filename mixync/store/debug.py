@@ -23,18 +23,22 @@ class DebugStore(Store):
     def update_tracks(self, tracks: list[Track]) -> int:
         for track in tracks:
             print(track)
+        return len(tracks)
 
     def update_crates(self, crates: list[Crate]) -> int:
         for crate in crates:
             print(crate)
+        return len(crates)
 
     def update_playlists(self, playlists: list[Playlist]) -> int:
         for playlist in playlists:
             print(playlist)
+        return len(playlists)
 
     def update_directories(self, directories: list[Directory]) -> int:
         for directory in directories:
             print(directory)
+        return len(directories)
 
     # Upload/download methods
 

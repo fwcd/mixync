@@ -27,4 +27,4 @@ class Track:
     rating: Optional[int] = None
     key: Optional[str] = None
     color: Optional[int] = None
-    last_played_at: datetime = field(default_factory=lambda: datetime())
+    last_played_at: datetime = field(default_factory=datetime.now)

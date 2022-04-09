@@ -63,7 +63,8 @@ class MixxxStore(Store):
         return None
 
     def _find_base_directory(self, path: Path, opts: Options) -> Optional[Path]:
-        directories = [Path(dir.directory) for dir in self._query_all(MixxxDirectory)]
+        with self.make_session() as session:
+            directories = [Path(dir.directory) for dir in session.query(MixxxDirectory)]
 
         # Try to find the base directory among the stored directories
         for directory in directories:
@@ -73,18 +74,22 @@ class MixxxStore(Store):
         # If not skip_uncategorized, use the parent directory
         return None if opts.skip_uncategorized else path.parent
 
-    def relativize_directory_location(self, location: str, opts: Options) -> Optional[str]:
+    def relativize_directory(self, directory: Directory, opts: Options) -> Optional[Directory]:
         # TODO: Handle case where user may have multiple directories with same name?
-        return Path(location).name
+        new_directory = super().relativize_directory(directory, opts)
+        new_directory.location = Path(directory.location).name
+        return new_directory
 
-    def relativize_track_location(self, location: str, opts: Options) -> Optional[str]:
+    def relativize_track(self, track: Track, opts: Options) -> Optional[Track]:
         # Relativize w.r.t a base directory from the db and POSIX-ify paths
-        location = Path(location)
+        new_track = super().relativize_track(track, opts)
+        location = Path(track.location)
         base_directory = self._find_base_directory(location, opts)
         if not base_directory:
             return None
         rel_location = location.relative_to(base_directory.parent)
-        return rel_location.as_posix()
+        new_track.location = rel_location
+        return new_track
     
     def _make_model_id(self, id):
         h = hashlib.sha1()
@@ -103,37 +108,39 @@ class MixxxStore(Store):
     def tracks(self) -> Iterable[Track]:
         with self.make_session() as session:
             for track in session.query(MixxxTrack):
-                yield Track(
-                    id=self._make_model_id(track.id),
-                    title=track.title,
-                    artist=track.artist,
-                    location=track.location,
-                    album=track.album,
-                    year=track.year,
-                    genre=track.genre,
-                    comment=track.comment,
-                    duration=track.duration,
-                    tracknumber=track.tracknumber,
-                    url=track.url,
-                    samplerate=track.samplerate,
-                    cuepoint=track.cuepoint,
-                    cues=list(Cue(
-                        id=self._make_model_id(c.id),
-                        type=c.type,
-                        position=c.position,
-                        length=c.length,
-                        hotcue=c.hotcue,
-                        label=c.label,
-                        color=c.color
-                    ) for c in session.query(MixxxCue).where(MixxxCue.track_id == track.id)),
-                    bpm=track.bpm,
-                    channels=track.channels,
-                    times_played=track.timesplayed,
-                    rating=track.rating,
-                    key=track.key,
-                    color=track.color,
-                    last_played_at=track.last_played_at
-                )
+                location = session.query(MixxxTrackLocation).where(MixxxTrackLocation.id == track.location).first()
+                if location and not location.fs_deleted:
+                    yield Track(
+                        id=self._make_model_id(track.id),
+                        title=track.title,
+                        artist=track.artist,
+                        location=location.location,
+                        album=track.album,
+                        year=track.year,
+                        genre=track.genre,
+                        comment=track.comment,
+                        duration=track.duration,
+                        tracknumber=track.tracknumber,
+                        url=track.url,
+                        samplerate=track.samplerate,
+                        cuepoint=track.cuepoint,
+                        cues=list(Cue(
+                            id=self._make_model_id(c.id),
+                            type=c.type,
+                            position=c.position,
+                            length=c.length,
+                            hotcue=c.hotcue,
+                            label=c.label,
+                            color=c.color
+                        ) for c in session.query(MixxxCue).where(MixxxCue.track_id == track.id)),
+                        bpm=track.bpm,
+                        channels=track.channels,
+                        times_played=track.timesplayed,
+                        rating=track.rating,
+                        key=track.key,
+                        color=track.color,
+                        last_played_at=track.last_played_at
+                    )
     
     def crates(self) -> Iterable[Crate]:
         with self.make_session() as session:
@@ -143,7 +150,7 @@ class MixxxStore(Store):
                     id=self._make_model_id(crate.id),
                     name=crate.name,
                     track_ids=list(
-                        self._make_model_id(t.id)
+                        self._make_model_id(t.track_id)
                         for t in session.query(MixxxCrateTrack).where(MixxxCrateTrack.crate_id == crate.id)
                     )
                 )
