@@ -3,16 +3,16 @@ from sqlalchemy.orm import sessionmaker, make_transient
 from pathlib import Path
 from typing import Iterator, Optional, Type, TypeVar
 
-from mixync.model.crate import Crate
-from mixync.model.crate_track import CrateTrack
-from mixync.model.cue import Cue
-from mixync.model.directory import *
-from mixync.model.playlist import Playlist
-from mixync.model.playlist_track import PlaylistTrack
-from mixync.model.track import *
-from mixync.model.track_location import *
-from mixync.options import Options
 from mixync.store import Store
+from mixync.store.mixxx.model.crate import Crate
+from mixync.store.mixxx.model.crate_track import CrateTrack
+from mixync.store.mixxx.model.cue import Cue
+from mixync.store.mixxx.model.directory import *
+from mixync.store.mixxx.model.playlist import Playlist
+from mixync.store.mixxx.model.playlist_track import PlaylistTrack
+from mixync.store.mixxx.model.track import *
+from mixync.store.mixxx.model.track_location import *
+from mixync.options import Options
 
 T = TypeVar('T')
 
@@ -34,7 +34,7 @@ def find_local_mixxxdir() -> Path:
 
 LOCAL_MIXXXDB_PATH = find_local_mixxxdir() / 'mixxxdb.sqlite'
 
-class LocalStore(Store):
+class MixxxStore(Store):
     """A wrapper around the user's local mixxxdb."""
 
     def __init__(self, path: Path=LOCAL_MIXXXDB_PATH):
@@ -44,13 +44,13 @@ class LocalStore(Store):
     @staticmethod
     def parse_ref(ref: str):
         if ref == '@local':
-            return LocalStore()
+            return MixxxStore()
         try:
             path = Path(ref)
         except:
             return None
         if path.name == 'mixxxdb.sqlite':
-            return LocalStore(path)
+            return MixxxStore(path)
         return None
 
     def _query_all(self, cls: Type[T]) -> Iterator[T]:

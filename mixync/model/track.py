@@ -1,55 +1,29 @@
-from sqlalchemy import Column, ForeignKey, DateTime, Integer, Float, String, Text, LargeBinary
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Optional
 
-from mixync.model import Base, dict_convertible
+from mixync.model.cue import Cue
 
-@dict_convertible
-class Track(Base):
-    __tablename__ = 'library'
-
-    id = Column(Integer, primary_key=True)
-    artist = Column(String(64))
-    title = Column(String(64))
-    album = Column(String(64))
-    year = Column(String(16))
-    genre = Column(String(64))
-    tracknumber = Column(String(3))
-    location = Column(ForeignKey('track_locations.id'))
-    comment = Column(String(256))
-    url = Column(String(256))
-    duration = Column(Float)
-    samplerate = Column(Integer)
-    cuepoint = Column(Integer)
-    bpm = Column(Float)
-    wavesummaryhex = Column(LargeBinary)
-    channels = Column(Integer)
-    # TODO: SQLite seems to have trouble parsing some datetime strings from Mixxx
-    # datetime_added = Column(DateTime, server_default=func.now())
-    mixxx_deleted = Column(Integer)
-    played = Column(Integer)
-    header_parsed = Column(Integer, default=0)
-    filetype = Column(String(8), default='?')
-    replaygain = Column(Float, default=0.0)
-    # TODO: The SQLite schema says REAL, does this matter?
-    replaygain_peak = Column(Float, default=-1.0)
-    timesplayed = Column(Integer, default=0)
-    rating = Column(Integer, default=0)
-    key = Column(String(8), default='')
-    beats = Column(LargeBinary)
-    beats_version = Column(Text)
-    composer = Column(String(64), default='')
-    bpm_lock = Column(Integer, default=0)
-    beats_sub_version = Column(Text, default='')
-    keys = Column(LargeBinary)
-    keys_version = Column(Text)
-    keys_sub_version = Column(Text)
-    key_id = Column(Integer, default=0)
-    grouping = Column(Text, default='')
-    album_artist = Column(Text, default='')
-    coverart_source = Column(Integer, default=0)
-    coverart_location = Column(Text, default='')
-    coverart_color = Column(Integer)
-    coverart_digest = Column(LargeBinary)
-    tracktotal = Column(Text, default='//')
-    color = Column(Integer)
-    last_played_at = Column(DateTime, default=None)
-    source_synchronized_ms = Column(Integer, default=None)
+@dataclass
+class Track:
+    id: str # a UUID independent of Mixxx's id scheme
+    title: str
+    artist: str
+    location: str
+    duration: float
+    album: Optional[str] = None
+    tracknumber: Optional[int] = None
+    year: Optional[str] = None
+    genre: Optional[str] = None
+    comment: Optional[str] = None
+    url: Optional[str] = None
+    samplerate: Optional[int] = None
+    cuepoint: int = 0
+    cues: list[Cue] = field(default_factory=lambda: [])
+    bpm: Optional[float] = None
+    channels: Optional[int] = None
+    times_played: Optional[int] = None
+    rating: Optional[int] = None
+    key: Optional[str] = None
+    color: Optional[int] = None
+    last_played_at: datetime = field(default_factory=lambda: datetime())

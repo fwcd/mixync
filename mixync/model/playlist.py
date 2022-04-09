@@ -1,15 +1,12 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Optional
 
-from mixync.model import Base, dict_convertible
-
-@dict_convertible
-class Playlist(Base):
-    __tablename__ = 'Playlists'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(48))
-    position = Column(Integer)
-    hidden = Column(Integer, default=0, nullable=False)
-    date_created = Column(DateTime)
-    date_modified = Column(DateTime)
-    locked = Column(Integer, default=0)
+@dataclass
+class Playlist:
+    id: str # a UUID independent of Mixxx's id scheme
+    name: str
+    position: int
+    date_created: datetime = field(default_factory=lambda: datetime())
+    date_modified: datetime = field(default_factory=lambda: datetime())
+    track_ids: list[str] = field(default_factory=lambda: [])
