@@ -153,6 +153,7 @@ class MixxxStore(Store):
                 yield Crate(
                     id=self._make_model_id(crate.id),
                     name=crate.name,
+                    locked=bool(crate.locked),
                     track_ids=list(
                         self._make_model_id(t.track_id)
                         for t in session.query(MixxxCrateTrack).where(MixxxCrateTrack.crate_id == crate.id)
@@ -168,6 +169,8 @@ class MixxxStore(Store):
                     position=playlist.position,
                     date_created=playlist.date_created,
                     date_modified=playlist.date_modified,
+                    type=playlist.hidden,
+                    locked=bool(playlist.locked),
                     track_ids=list(
                         self._make_model_id(t.id)
                         for t in session.query(MixxxPlaylistTrack).where(MixxxPlaylistTrack.playlist_id == playlist.id)

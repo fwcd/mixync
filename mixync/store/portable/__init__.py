@@ -86,6 +86,7 @@ class PortableStore(Store):
                     name=crate.name,
                     date_created=crate.date_created,
                     date_modified=crate.date_modified,
+                    locked=crate.locked,
                     track_ids={t.track_id for t in crate.tracks}
                 )
     
@@ -97,6 +98,8 @@ class PortableStore(Store):
                     name=playlist.name,
                     date_created=playlist.date_created,
                     date_modified=playlist.date_modified,
+                    type=playlist.type,
+                    locked=playlist.locked,
                     track_ids=[t.track_id for t in sorted(playlist.tracks, key=lambda t: t.position)]
                 )
 
@@ -178,7 +181,8 @@ class PortableStore(Store):
                     id=crate.id,
                     name=crate.name,
                     date_created=crate.date_created,
-                    date_modified=crate.date_modified
+                    date_modified=crate.date_modified,
+                    locked=crate.locked
                 ))
                 for track_id in crate.track_ids:
                     session.merge(PortableCrateTrack(
@@ -197,7 +201,9 @@ class PortableStore(Store):
                     name=playlist.name,
                     position=playlist.position,
                     date_created=playlist.date_created,
-                    date_modified=playlist.date_modified
+                    date_modified=playlist.date_modified,
+                    type=playlist.type,
+                    locked=playlist.locked
                 ))
                 for i, track_id in enumerate(playlist.track_ids):
                     session.merge(PortablePlaylistTrack(
