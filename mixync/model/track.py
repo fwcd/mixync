@@ -15,11 +15,11 @@ class Track:
     year: str = ''
     genre: str = ''
     comment: str = ''
-    duration: Optional[float] = None
+    duration_ms: Optional[int] = None
     tracknumber: Optional[int] = None
     url: Optional[str] = None
     samplerate: Optional[int] = None
-    cuepoint: int = 0
+    # We don't need cuepoint, since that one's stored in cues too
     cues: list[Cue] = field(default_factory=lambda: [])
     bpm: Optional[float] = None
     channels: Optional[int] = None

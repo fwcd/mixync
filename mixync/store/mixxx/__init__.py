@@ -108,6 +108,9 @@ class MixxxStore(Store):
     def tracks(self) -> Iterable[Track]:
         with self.make_session() as session:
             for track in session.query(MixxxTrack):
+                def sample_to_ms(s) -> int:
+                    return int(s * 1000 / (track.channels * track.samplerate))
+
                 location = session.query(MixxxTrackLocation).where(MixxxTrackLocation.id == track.location).first()
                 if location and not location.fs_deleted:
                     yield Track(
@@ -119,16 +122,15 @@ class MixxxStore(Store):
                         year=track.year,
                         genre=track.genre,
                         comment=track.comment,
-                        duration=track.duration,
+                        duration_ms=int(track.duration * 1000),
                         tracknumber=track.tracknumber,
                         url=track.url,
                         samplerate=track.samplerate,
-                        cuepoint=track.cuepoint,
                         cues=list(Cue(
                             id=self._make_model_id(c.id),
                             type=c.type,
-                            position=c.position,
-                            length=c.length,
+                            position_ms=sample_to_ms(c.position),
+                            length_ms=sample_to_ms(c.length),
                             hotcue=c.hotcue,
                             label=c.label,
                             color=c.color
