@@ -59,6 +59,8 @@ class Store:
     @classmethod
     def parse_ref(cls, ref: str):
         raise NotImplementedError(f'parse is not implemented for {cls.__name__}!')
+    
+    # Query methods
 
     def tracks(self) -> list[Track]:
         """Fetches the tracks (metadata only) from this store."""
@@ -92,8 +94,8 @@ class Store:
         """Fetches the playlist tracks from this store."""
         return []
     
-    # TODO: update_cues, update_crates, update_crate_tracks, update_playlists, update_playlist_tracks
-
+    # Update methods
+    
     def update_tracks(self, tracks: list[Track]):
         """Merges the given tracks (metadata only) into the store."""
         raise NotImplementedError(f'update_tracks is not implemented for {type(self).__name__}!')
@@ -105,6 +107,28 @@ class Store:
     def update_directories(self, directories: list[Directory]):
         """Merges the given music directories into the store."""
         raise NotImplementedError(f'update_directories is not implemented for {type(self).__name__}!')
+
+    def update_cues(self, cues: list[Cue]):
+        """Merges the given cues into this store."""
+        return []
+
+    def update_crates(self, crates: list[Crate]):
+        """Merges the given crates into this store."""
+        return []
+
+    def update_crate_tracks(self, crate_tracks: list[CrateTrack]):
+        """Merges the given crate tracks into this store."""
+        return []
+
+    def update_playlists(self, playlists: list[Playlist]):
+        """Merges the given playlists into this store."""
+        return []
+
+    def update_playlist_tracks(self, playlist_tracks: list[PlaylistTrack]):
+        """Merges the given playlist tracks into this store."""
+        return []
+    
+    # Relativization/absolutization methods
     
     def relativize_track_location(self, track_location: TrackLocation, opts: Options) -> Optional[TrackLocation]:
         """
@@ -137,6 +161,8 @@ class Store:
         None will filter out this track. This is the identity function by default.
         """
         return directory.clone()
+    
+    # Upload/download methods
 
     def upload_track(self, location: str, raw: bytes):
         """
