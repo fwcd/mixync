@@ -18,8 +18,6 @@ from mixync.store.portable.model.playlist import *
 from mixync.store.portable.model.playlist_track import *
 from mixync.store.portable.model.track import *
 
-# FIXME: Update PortableStore to the new store interface
-
 class PortableStore(Store):
     """A wrapper around the portable musiclib."""
 
@@ -162,13 +160,53 @@ class PortableStore(Store):
     #        which isn't entirely correct (e.g. cues can get duplicated)
 
     def update_directories(self, directories: list[Directory]) -> int:
-        return self._merge_all(directories)
+        count = 0
+        with self.make_session.begin() as session:
+            for directory in directories:
+                session.merge(PortableDirectory(
+                    id=directory.id,
+                    location=directory.location
+                ))
+                count += 1
+        return count
 
     def update_crates(self, crates: list[Crate]) -> int:
-        return self._merge_all(crates)
+        count = 0
+        with self.make_session.begin() as session:
+            for crate in crates:
+                session.merge(PortableCrate(
+                    id=crate.id,
+                    name=crate.name,
+                    date_created=crate.date_created,
+                    date_modified=crate.date_modified
+                ))
+                for track_id in crate.track_ids:
+                    session.merge(PortableCrateTrack(
+                        crate_id=crate.id,
+                        track_id=track_id
+                    ))
+                count += 1
+        return count
 
     def update_playlists(self, playlists: list[Playlist]) -> int:
-        return self._merge_all(playlists)
+        count = 0
+        with self.make_session.begin() as session:
+            for playlist in playlists:
+                session.merge(PortablePlaylist(
+                    id=playlist.id,
+                    name=playlist.name,
+                    position=playlist.position,
+                    date_created=playlist.date_created,
+                    date_modified=playlist.date_modified
+                ))
+                for i, track_id in enumerate(playlist.track_ids):
+                    session.merge(PortablePlaylistTrack(
+                        playlist_id=playlist.id,
+                        track_id=track_id,
+                        position=i
+                    ))
+                count += 1
+        return count
 
     def download_track(self, location: str) -> bytes:
         path = self.path / location
