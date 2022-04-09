@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey, DateTime, Integer, Float, String, Text, LargeBinary
 
-from mixync.model import Base, dict_convertible
+from mixync.store.mixxx.model import Base, dict_convertible
 
 @dict_convertible
 class MixxxTrack(Base):

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey, Text
 
-from mixync.model import Base, dict_convertible
+from mixync.store.mixxx.model import Base, dict_convertible
 
 @dict_convertible
 class MixxxCue(Base):

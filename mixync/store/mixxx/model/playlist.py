@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime
 
-from mixync.model import Base, dict_convertible
+from mixync.store.mixxx.model import Base, dict_convertible
 
 @dict_convertible
 class MixxxPlaylist(Base):

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Text
 
-from mixync.model import Base, dict_convertible
+from mixync.store.mixxx.model import Base, dict_convertible
 
 @dict_convertible
 class MixxxDirectory(Base):
