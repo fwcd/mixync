@@ -55,6 +55,29 @@ class Store:
                     progress.print(f"Copied '{truncate(location.filename, 40)}' ({len(raw) / 1_000_000} MB)")
         if opts.log:
             print(f'==> Copied {len(zipped_locations)} track files')
+        
+        # Copy cue metadata
+        cues = self.cues()
+        other.update_cues(cues)
+        if opts.log:
+            print(f'==> Copied {len(cues)} cues')
+        
+        # Copy playlists
+        playlists = self.playlists()
+        playlist_tracks = self.playlist_tracks()
+        other.update_playlists(playlists)
+        other.update_playlist_tracks(playlist_tracks)
+        if opts.log:
+            print(f'==> Copied {len(playlists)} playlists')
+        
+        # Copy crates
+        crates = self.crates()
+        crate_tracks = self.crate_tracks()
+        other.update_crates(crates)
+        other.update_crate_tracks(crate_tracks)
+        if opts.log:
+            print(f'==> Copied {len(crates)} crates')
+        
     
     @classmethod
     def parse_ref(cls, ref: str):
