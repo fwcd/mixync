@@ -2,9 +2,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, make_transient
 from pathlib import Path
 from typing import Iterator, Optional, Type, TypeVar
-from mixync.model import directory
 
+from mixync.model.crate import Crate
+from mixync.model.crate_track import CrateTrack
+from mixync.model.cue import Cue
 from mixync.model.directory import *
+from mixync.model.playlist import Playlist
+from mixync.model.playlist_track import PlaylistTrack
 from mixync.model.track import *
 from mixync.model.track_location import *
 from mixync.options import Options
@@ -93,6 +97,21 @@ class LocalStore(Store):
     
     def track_locations(self) -> list[TrackLocation]:
         return list(l for l in self._query_all(TrackLocation) if not l.fs_deleted)
+
+    def cues(self) -> list[Cue]:
+        return list(self._query_all(Cue))
+    
+    def crates(self) -> list[Crate]:
+        return list(self._query_all(Crate))
+    
+    def crate_tracks(self) -> list[CrateTrack]:
+        return list(self._query_all(CrateTrack))
+    
+    def playlists(self) -> list[Playlist]:
+        return list(self._query_all(Playlist))
+    
+    def playlist_tracks(self) -> list[PlaylistTrack]:
+        return list(self._query_all(PlaylistTrack))
     
     # TODO: Update methods and upload
 

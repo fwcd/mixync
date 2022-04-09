@@ -51,6 +51,21 @@ class PortableStore(Store):
     
     def track_locations(self) -> list[TrackLocation]:
         return list(self._query_all(TrackLocation))
+
+    def cues(self) -> list[Cue]:
+        return list(self._query_all(Cue))
+    
+    def crates(self) -> list[Crate]:
+        return list(self._query_all(Crate))
+    
+    def crate_tracks(self) -> list[CrateTrack]:
+        return list(self._query_all(CrateTrack))
+    
+    def playlists(self) -> list[Playlist]:
+        return list(self._query_all(Playlist))
+    
+    def playlist_tracks(self) -> list[PlaylistTrack]:
+        return list(self._query_all(PlaylistTrack))
     
     def update_tracks(self, tracks: list[Track]):
         with self.make_session() as session:

@@ -1,7 +1,12 @@
 from __future__ import annotations
 from typing import Optional
 
+from mixync.model.crate import Crate
+from mixync.model.crate_track import CrateTrack
+from mixync.model.cue import Cue
 from mixync.model.directory import Directory
+from mixync.model.playlist import Playlist
+from mixync.model.playlist_track import PlaylistTrack
 from mixync.model.track import Track
 from mixync.model.track_location import TrackLocation
 from mixync.options import Options
@@ -66,6 +71,28 @@ class Store:
     def directories(self) -> list[Directory]:
         """Fetches the music directories from this store."""
         return []
+    
+    def cues(self) -> list[Cue]:
+        """Fetches the cues from this store."""
+        return []
+    
+    def crates(self) -> list[Crate]:
+        """Fetches the crates from this store."""
+        return []
+    
+    def crate_tracks(self) -> list[CrateTrack]:
+        """Fetches the crate tracks from this store."""
+        return []
+    
+    def playlists(self) -> list[Playlist]:
+        """Fetches the playlists from this store."""
+        return []
+    
+    def playlist_tracks(self) -> list[PlaylistTrack]:
+        """Fetches the playlist tracks from this store."""
+        return []
+    
+    # TODO: update_cues, update_crates, update_crate_tracks, update_playlists, update_playlist_tracks
 
     def update_tracks(self, tracks: list[Track]):
         """Merges the given tracks (metadata only) into the store."""
