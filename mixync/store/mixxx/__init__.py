@@ -109,7 +109,11 @@ class MixxxStore(Store):
     
     def tracks(self, name: Optional[str]=None, artist: Optional[str]=None) -> Iterable[Track]:
         with self.make_session() as session:
-            for track in session.query(MixxxTrack):
+            constraints = [c for c in [
+                MixxxTrack.name == name if name else None,
+                MixxxTrack.artist == artist if artist else None,
+            ] if c]
+            for track in session.query(MixxxTrack).where(*constraints):
                 def sample_to_ms(s) -> int:
                     return int(s * 1000 / (track.channels * track.samplerate))
 
@@ -148,7 +152,10 @@ class MixxxStore(Store):
     
     def crates(self, name: Optional[str]=None) -> Iterable[Crate]:
         with self.make_session() as session:
-            for crate in session.query(MixxxCrate):
+            constraints = [c for c in [
+                MixxxCrate.name == name if name else None,
+            ] if c]
+            for crate in session.query(MixxxCrate).where(*constraints):
                 # TODO: Proper creation/modification dates?
                 yield Crate(
                     id=self._make_model_id(crate.id),
@@ -162,7 +169,10 @@ class MixxxStore(Store):
     
     def playlists(self, name: Optional[str]=None) -> Iterable[Playlist]:
         with self.make_session() as session:
-            for playlist in session.query(MixxxPlaylist):
+            constraints = [c for c in [
+                MixxxPlaylist.name == name if name else None,
+            ] if c]
+            for playlist in session.query(MixxxPlaylist).where(*constraints):
                 yield Playlist(
                     id=self._make_model_id(playlist.id),
                     name=playlist.name,

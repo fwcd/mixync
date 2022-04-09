@@ -48,7 +48,11 @@ class PortableStore(Store):
     
     def tracks(self, name: Optional[str]=None, artist: Optional[str]=None) -> Iterable[Track]:
         with self.make_session() as session:
-            for track in session.query(PortableTrack):
+            constraints = [c for c in [
+                PortableTrack.name == name if name else None,
+                PortableTrack.artist == artist if artist else None,
+            ] if c]
+            for track in session.query(PortableTrack).where(*constraints):
                 yield Track(
                     id=track.id,
                     title=track.title,
@@ -82,7 +86,10 @@ class PortableStore(Store):
     
     def crates(self, name: Optional[str]=None) -> Iterable[Crate]:
         with self.make_session() as session:
-            for crate in session.query(PortableCrate):
+            constraints = [c for c in [
+                PortableCrate.name == name if name else None,
+            ] if c]
+            for crate in session.query(PortableCrate).where(*constraints):
                 yield Crate(
                     id=crate.id,
                     name=crate.name,
@@ -94,7 +101,10 @@ class PortableStore(Store):
     
     def playlists(self, name: Optional[str]=None) -> Iterable[Playlist]:
         with self.make_session() as session:
-            for playlist in session.query(PortablePlaylist):
+            constraints = [c for c in [
+                PortablePlaylist.name == name if name else None,
+            ] if c]
+            for playlist in session.query(PortablePlaylist).where(*constraints):
                 yield Playlist(
                     id=playlist.id,
                     name=playlist.name,
