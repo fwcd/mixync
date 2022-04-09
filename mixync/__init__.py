@@ -2,10 +2,12 @@ import argparse
 
 from mixync.options import Options
 from mixync.store import Store
+from mixync.store.debug import DebugStore
 from mixync.store.mixxx import MixxxStore
 from mixync.store.portable import PortableStore
 
 STORES = [
+    DebugStore,
     MixxxStore,
     PortableStore,
 ]

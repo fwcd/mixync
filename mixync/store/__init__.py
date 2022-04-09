@@ -160,5 +160,4 @@ class Store:
         """
         raise NotImplementedError(f'download_track is not implemented for {type(self).__name__}!')
     
-    # TODO: Add support for crates and playlists
     # TODO: Add upload/download methods for analysis data
