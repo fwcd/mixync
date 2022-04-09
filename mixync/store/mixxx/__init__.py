@@ -131,8 +131,8 @@ class MixxxStore(Store):
                             type=c.type,
                             position_ms=sample_to_ms(c.position),
                             length_ms=sample_to_ms(c.length),
-                            hotcue=c.hotcue,
-                            label=c.label,
+                            hotcue=c.hotcue if c.hotcue >= 0 else None,
+                            label=c.label if c.label else None,
                             color=c.color
                         ) for c in session.query(MixxxCue).where(MixxxCue.track_id == track.id)),
                         bpm=track.bpm,
