@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, Text, DateTime
+from sqlalchemy import Column, Integer, Float, Text, DateTime, LargeBinary
 from sqlalchemy.orm import relationship
 
 from mixync.store.portable.model import Base
@@ -19,10 +19,16 @@ class PortableTrack(Base):
     url = Column(Text, nullable=True)
     sample_rate = Column(Integer, nullable=True)
     bpm = Column(Float, nullable=True)
+    beats = Column(LargeBinary, nullable=True)
+    beats_version = Column(Text, nullable=True)
+    beats_sub_version = Column(Text, nullable=True)
     channels = Column(Integer, nullable=True)
     times_played = Column(Integer, nullable=True)
     rating = Column(Integer, nullable=True)
     key = Column(Text, nullable=True)
+    keys = Column(LargeBinary, nullable=True)
+    keys_version = Column(Text, nullable=True)
+    keys_sub_version = Column(Text, nullable=True)
     color = Column(Integer, nullable=True)
     last_played_at = Column(DateTime, nullable=True)
 
