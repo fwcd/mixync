@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from mixync.store.portable.model import Base
 
 class PortableTrack(Base):
-    __tablename__ = 'track'
+    __tablename__ = 'tracks'
 
     id = Column(Text, primary_key=True)
     title = Column(Text, default='', nullable=False)

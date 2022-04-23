@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from mixync.store.portable.model import Base
 
 class PortableCrate(Base):
-    __tablename__ = 'crate'
+    __tablename__ = 'crates'
 
     id = Column(Text, primary_key=True)
     name = Column(Text, unique=True, nullable=False)

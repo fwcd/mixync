@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from mixync.store.portable.model import Base
 
 class PortablePlaylist(Base):
-    __tablename__ = 'playlist'
+    __tablename__ = 'playlists'
 
     id = Column(Text, primary_key=True)
     name = Column(Text, unique=True, nullable=False)

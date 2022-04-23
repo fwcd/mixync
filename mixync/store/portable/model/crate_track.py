@@ -3,7 +3,7 @@ from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Text
 from mixync.store.portable.model import Base
 
 class PortableCrateTrack(Base):
-    __tablename__ = 'crate_track'
+    __tablename__ = 'crate_tracks'
 
-    crate_id = Column(ForeignKey('crate.id'), primary_key=True)
-    track_id = Column(ForeignKey('track.id'), primary_key=True)
+    crate_id = Column(ForeignKey('crates.id'), primary_key=True)
+    track_id = Column(ForeignKey('tracks.id'), primary_key=True)
