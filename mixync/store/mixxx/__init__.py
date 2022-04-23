@@ -159,8 +159,7 @@ class MixxxStore(Store):
                         times_played=track.timesplayed,
                         rating=track.rating,
                         key=track.key,
-                        color=track.color,
-                        last_played_at=track.last_played_at
+                        color=track.color
                     )
     
     def crates(self, name: Optional[str]=None) -> Iterable[Crate]:

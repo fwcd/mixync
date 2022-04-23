@@ -80,8 +80,7 @@ class PortableStore(Store):
                     times_played=track.times_played,
                     rating=track.rating,
                     key=track.key,
-                    color=track.color,
-                    last_played_at=track.last_played_at
+                    color=track.color
                 )
     
     def crates(self, name: Optional[str]=None) -> Iterable[Crate]:
@@ -155,8 +154,7 @@ class PortableStore(Store):
                     times_played=track.times_played,
                     rating=track.rating,
                     key=track.key,
-                    color=track.color,
-                    last_played_at=track.last_played_at
+                    color=track.color
                 ))
                 if track.cues:
                     session.execute(delete(PortableCue).where(PortableCue.track_id == id))
