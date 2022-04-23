@@ -2,7 +2,7 @@ from sqlalchemy import Column, Text, Integer
 
 from mixync.store.mixxx.model import Base
 
-class MixxxSettings(Base):
+class MixxxSetting(Base):
     __tablename__ = 'settings'
 
     name = Column(Text, primary_key=True)

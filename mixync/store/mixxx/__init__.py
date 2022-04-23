@@ -18,7 +18,7 @@ from mixync.store.mixxx.model.cue import *
 from mixync.store.mixxx.model.directory import *
 from mixync.store.mixxx.model.playlist import *
 from mixync.store.mixxx.model.playlist_track import *
-from mixync.store.mixxx.model.settings import *
+from mixync.store.mixxx.model.setting import *
 from mixync.store.mixxx.model.track import *
 from mixync.store.mixxx.model.track_location import *
 from mixync.options import Options
@@ -43,6 +43,7 @@ def find_local_mixxxdir() -> Path:
     return None
 
 LOCAL_MIXXXDB_PATH = find_local_mixxxdir() / 'mixxxdb.sqlite'
+MIN_SCHEMA_VERSION = 32
 
 class MixxxStore(Store):
     """A wrapper around the user's local mixxxdb."""
@@ -50,6 +51,10 @@ class MixxxStore(Store):
     def __init__(self, path: Path=LOCAL_MIXXXDB_PATH):
         engine = create_engine(f'sqlite:///{path}')
         self.make_session = sessionmaker(bind=engine, expire_on_commit=False)
+
+        schema_version = self._schema_version()
+        if schema_version < MIN_SCHEMA_VERSION:
+            raise RuntimeError(f'Mixxxdb has schema version {schema_version}, but the minimum version supported by mixync is {MIN_SCHEMA_VERSION}.')
     
     @staticmethod
     def parse_ref(ref: str):
@@ -62,6 +67,13 @@ class MixxxStore(Store):
         if path.name == 'mixxxdb.sqlite':
             return MixxxStore(path)
         return None
+    
+    def _schema_version(self) -> Optional[int]:
+        with self.make_session() as session:
+            row = session.query(MixxxSetting).where(MixxxSetting.name == 'mixxx.schema.version').first()
+            if not row:
+                return None
+            return int(row.value)
 
     def _find_base_directory(self, path: Path, opts: Options) -> Optional[Path]:
         with self.make_session() as session:
