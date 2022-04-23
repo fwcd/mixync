@@ -7,6 +7,8 @@ from mixync.model.playlist_type import PlaylistType
 
 @dataclass
 class Playlist:
+    """An ordered list of tracks."""
+
     id: str = field(default_factory=lambda: str(uuid4())) # a globally unique id (e.g. UUID, SHA1, ...) independent of Mixxx's id scheme
     name: str = ''
     position: Optional[int] = None

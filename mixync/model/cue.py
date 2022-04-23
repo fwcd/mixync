@@ -6,6 +6,8 @@ from mixync.model.cue_type import CueType
 
 @dataclass
 class Cue:
+    """A position or loop marker within a track."""
+
     id: str = field(default_factory=lambda: str(uuid4())) # a globally unique id (e.g. UUID, SHA1, ...) independent of Mixxx's id scheme
     type: CueType = CueType.INVALID
     position_ms: Optional[int] = None

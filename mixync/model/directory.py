@@ -3,6 +3,8 @@ from uuid import uuid4
 
 @dataclass
 class Directory:
+    """A music directory containing audio files."""
+
     id: str = field(default_factory=lambda: str(uuid4())) # a globally unique id (e.g. UUID, SHA1, ...) independent of Mixxx's id scheme
     location: str = ''
 
