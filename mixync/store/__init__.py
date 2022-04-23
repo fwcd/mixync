@@ -22,6 +22,18 @@ class Store:
         # TODO: Add methods for matching tracks to existing tracks in the DB
         #       at the store level? Perhaps just more fine grained query methods?
 
+        # Copy directory metadata
+        # NOTE: It is important that directory metadata is copied first since
+        #       the store implementation may e.g. prompt the user in
+        #       'absolutize_directory' about the mapping before writing anything.
+        directories = list(self.directories())
+        rel_directories = [self.relativize_directory(d, opts) for d in directories]
+        dest_directories = [other.absolutize_directory(d, opts) if d else None for d in rel_directories]
+        updated_directories = [d for d in dest_directories if d]
+        updated_directory_count = other.update_directories(updated_directories)
+        if opts.log:
+            print(f'==> Copied {updated_directory_count} directories')
+
         # Copy track metadata
         tracks = list(self.tracks())
         rel_tracks = [self.relativize_track(t, opts) for t in tracks]
@@ -30,15 +42,6 @@ class Store:
         updated_track_count = other.update_tracks(updated_tracks)
         if opts.log:
             print(f'==> Copied {updated_track_count} tracks')
-        
-        # Copy directory metadata
-        directories = list(self.directories())
-        rel_directories = [self.relativize_directory(d, opts) for d in directories]
-        dest_directories = [other.absolutize_directory(d, opts) if d else None for d in rel_directories]
-        updated_directories = [d for d in dest_directories if d]
-        updated_directory_count = other.update_directories(updated_directories)
-        if opts.log:
-            print(f'==> Copied {updated_directory_count} directories')
 
         # Copy actual track files
         zipped_tracks = [(t, d) for t, d in zip(tracks, dest_tracks) if t and d]
