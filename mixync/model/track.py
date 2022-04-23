@@ -3,7 +3,9 @@ from datetime import datetime
 from uuid import uuid4
 from typing import Optional
 
+from mixync.model.beats import Beats
 from mixync.model.cue import Cue
+from mixync.model.keys import Keys
 
 @dataclass
 class Track:
@@ -22,9 +24,11 @@ class Track:
     # We don't need cuepoint, since that one's stored in cues too
     cues: list[Cue] = field(default_factory=lambda: [])
     bpm: Optional[float] = None
+    beats: Optional[Beats] = None
+    key: Optional[str] = None
+    keys: Optional[Keys] = None
     channels: Optional[int] = None
     times_played: Optional[int] = None
     rating: Optional[int] = None
-    key: Optional[str] = None
     color: Optional[int] = None
     last_played_at: Optional[datetime] = None
