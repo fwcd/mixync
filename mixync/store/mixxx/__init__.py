@@ -18,6 +18,7 @@ from mixync.store.mixxx.model.cue import *
 from mixync.store.mixxx.model.directory import *
 from mixync.store.mixxx.model.playlist import *
 from mixync.store.mixxx.model.playlist_track import *
+from mixync.store.mixxx.model.settings import *
 from mixync.store.mixxx.model.track import *
 from mixync.store.mixxx.model.track_location import *
 from mixync.options import Options
