@@ -24,6 +24,7 @@ class PortableStore(Store):
     def __init__(self, path: Path):
         path.mkdir(parents=True, exist_ok=True)
         self.path = path
+        self.audio_path = path / 'audio'
 
         db_path = path / 'library.sqlite3'
         self.engine = create_engine(f'sqlite:///{db_path}')
@@ -230,12 +231,12 @@ class PortableStore(Store):
         return count
 
     def download_track(self, location: str) -> bytes:
-        path = self.path / location
+        path = self.audio_path / location
         with open(path, 'rb') as f:
             return f.read()
 
     def upload_track(self, location: str, raw: bytes):
-        path = self.path / location
+        path = self.audio_path / location
         path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, 'wb') as f:
             f.write(raw)
