@@ -5,10 +5,12 @@ from typing import Iterable, Optional, Type, TypeVar
 
 import hashlib
 import random
+from mixync.model.beats import Beats
 
 from mixync.model.crate import Crate
 from mixync.model.cue import Cue
 from mixync.model.directory import Directory
+from mixync.model.keys import Keys
 from mixync.model.playlist import Playlist
 from mixync.model.track import Track
 from mixync.store import Store
@@ -155,10 +157,20 @@ class MixxxStore(Store):
                             color=c.color
                         ) for c in session.query(MixxxCue).where(MixxxCue.track_id == track.id)),
                         bpm=track.bpm,
+                        beats=Beats(
+                            data=track.beats,
+                            version=track.beats_version,
+                            sub_version=track.beats_sub_version
+                        ),
                         channels=track.channels,
                         times_played=track.timesplayed,
                         rating=track.rating,
                         key=track.key,
+                        keys=Keys(
+                            data=track.keys,
+                            version=track.keys_version,
+                            sub_version=track.keys_sub_version
+                        ),
                         color=track.color
                     )
     

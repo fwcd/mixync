@@ -151,10 +151,16 @@ class PortableStore(Store):
                     url=track.url,
                     sample_rate=track.sample_rate,
                     bpm=track.bpm,
+                    beats=track.beats.data if track.beats else None,
+                    beats_version=track.beats.version if track.beats else None,
+                    beats_sub_version=track.beats.sub_version if track.beats else None,
                     channels=track.channels,
                     times_played=track.times_played,
                     rating=track.rating,
                     key=track.key,
+                    keys=track.keys.data if track.keys else None,
+                    keys_version=track.keys.version if track.keys else None,
+                    keys_sub_version=track.keys.sub_version if track.keys else None,
                     color=track.color
                 ))
                 if track.cues:
