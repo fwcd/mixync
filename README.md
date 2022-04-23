@@ -2,7 +2,7 @@
 
 Like `rsync` but for Mixxx databases and music.
 
-> **NOTE: The project is still in very early stages, so please make sure to back up your mixxxdb and your music before trying it. Additionally the portable database's schema should be considered _unstable_ until we have a proper solution for database migrations and schema versioning in place (e.g. using alembic).**
+> **NOTE: The project is still in very early stages, so please make sure to back up your mixxxdb and your music before trying it. Additionally the portable database's schema should be considered _unstable_ until we have a proper solution for database migrations and schema versioning in place (e.g. using alembic), see [#11](https://github.com/fwcd/mixync/issues/11).**
 
 ```
 +-------------------+
