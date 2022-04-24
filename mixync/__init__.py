@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 from pathlib import Path
 
@@ -21,7 +22,7 @@ def parse_ref(ref: str) -> Store:
             return store
 
     print(f"Could not parse ref '{ref}'!")
-    exit(1)
+    sys.exit(1)
 
 def main():
     parser = argparse.ArgumentParser(prog='mixync', description='Tool for copying Mixxx databases with tracks in a portable manner')
@@ -34,7 +35,7 @@ def main():
 
     if args.source == args.dest:
         print('Source and destination identical, doing nothing.')
-        exit(0)
+        sys.exit(0)
 
     source = parse_ref(args.source)
     dest = parse_ref(args.dest)

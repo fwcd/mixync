@@ -5,6 +5,7 @@ from typing import Iterable, Optional, Type, TypeVar
 
 import hashlib
 import random
+import sys
 from mixync.model.beats import Beats
 
 from mixync.model.crate import Crate
@@ -24,6 +25,7 @@ from mixync.store.mixxx.model.setting import *
 from mixync.store.mixxx.model.track import *
 from mixync.store.mixxx.model.track_location import *
 from mixync.options import Options
+from mixync.utils.cli import confirm
 
 T = TypeVar('T')
 ID_HASH_BASE = random.getrandbits(64)
@@ -77,9 +79,12 @@ class MixxxStore(Store):
                 return None
             return int(row.value)
 
-    def _find_base_directory(self, path: Path, opts: Options) -> Optional[Path]:
+    def _directories(self) -> list[Path]:
         with self.make_session() as session:
-            directories = [Path(dir.directory) for dir in session.query(MixxxDirectory)]
+            return [Path(dir.directory) for dir in session.query(MixxxDirectory)]
+
+    def _find_base_directory(self, path: Path, opts: Options) -> Optional[Path]:
+        directories = self._directories()
 
         # Try to find the base directory among the stored directories
         for directory in directories:
@@ -106,10 +111,28 @@ class MixxxStore(Store):
         new_track.location = rel_location.as_posix()
         return new_track
     
+    def _find_matching_directory(self, name: str, opts: Options) -> Path:
+        directories = self._directories()
+
+        # Try to find a matching directory among the stored directories
+        for directory in directories:
+            if directory.name == name:
+                return directory
+        
+        # Otherwise use a subdirectory of the dest root (or ~/Music by default)
+        root_directory = opts.dest_root_dir or Path.home() / 'Music'
+        return root_directory / name
+
     def absolutize_directory(self, directory: Directory, opts: Options) -> Optional[Directory]:
         new_directory = super().absolutize_directory(directory, opts)
-
-        return None
+        location = Path(directory.location)
+        if not location.parts:
+            raise ValueError('Cannot absolutize a directory with an empty location path.')
+        matching_location = self._find_matching_directory(location.parts[0])
+        if not confirm(f"Map '{directory.location}' to '{matching_location}'?", opts):
+            sys.exit(0)
+        new_directory.location = matching_location
+        return new_directory
     
     # TODO: absolutize_track
     
