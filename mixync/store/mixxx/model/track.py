@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, DateTime, Integer, Float, String, Text, LargeBinary
+from sqlalchemy import Column, ForeignKey, Integer, Float, String, Text, LargeBinary
 
 from mixync.store.mixxx.model import Base
 

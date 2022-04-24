@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Text
+from sqlalchemy import Column, Text
 
 from mixync.store.portable.model import Base
 
