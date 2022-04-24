@@ -114,13 +114,17 @@ class MixxxStore(Store):
     def _find_matching_directory(self, name: str, opts: Options) -> Path:
         directories = self._directories()
 
+        # If a destination root directory is specified, use a subdirectory
+        if opts.dest_root_dir:
+            return opts.dest_root_dir / name
+
         # Try to find a matching directory among the stored directories
         for directory in directories:
             if directory.name == name:
                 return directory
         
-        # Otherwise use a subdirectory of the dest root (or ~/Music by default)
-        root_directory = opts.dest_root_dir or Path.home() / 'Music'
+        # Otherwise use a subdirectory of ~/Music
+        root_directory = Path.home() / 'Music'
         return root_directory / name
 
     def absolutize_directory(self, directory: Directory, opts: Options) -> Optional[Directory]:
