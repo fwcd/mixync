@@ -1,5 +1,7 @@
 import argparse
 
+from pathlib import Path
+
 from mixync.options import Options
 from mixync.store import Store
 from mixync.store.debug import DebugStore
@@ -25,6 +27,7 @@ def main():
     parser = argparse.ArgumentParser(description='Tool for copying Mixxx databases with tracks in a portable manner')
     parser.add_argument('source', help='The source ref (to be copied from)')
     parser.add_argument('dest', help='The destination ref (to be copied to)')
+    parser.add_argument('-d', '--dest-root-dir', type=str, help='A root folder to place copied music directories in. Only used by some destination stores.')
 
     args = parser.parse_args()
 
@@ -35,7 +38,8 @@ def main():
     source = parse_ref(args.source)
     dest = parse_ref(args.dest)
     opts = Options(
-        log=True
+        log=True,
+        dest_root_dir=Path(args.dest_root_dir) if args.dest_root_dir else None
     )
 
     source.copy_to(dest, opts=opts)
