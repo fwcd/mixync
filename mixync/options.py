@@ -8,6 +8,8 @@ class Options:
     skip_uncategorized: bool = True
     # Whether to log output during the copy.
     log: bool = False
+    # Whether to skip all actual file changes.
+    dry_run: bool = False
     # Whether to disable interactive prompts.
     assume_yes: bool = False
     # A root folder to place copied music directories in. Only used

@@ -30,7 +30,7 @@ class Store:
         rel_directories = [self.relativize_directory(d, opts) for d in directories]
         dest_directories = [other.absolutize_directory(d, opts) if d else None for d in rel_directories]
         updated_directories = [d for d in dest_directories if d]
-        updated_directory_count = other.update_directories(updated_directories)
+        updated_directory_count = 0 if opts.dry_run else other.update_directories(updated_directories)
         if opts.log:
             print(f'==> Copied {updated_directory_count} directories')
 
@@ -39,12 +39,12 @@ class Store:
         rel_tracks = [self.relativize_track(t, opts) for t in tracks]
         dest_tracks = [other.absolutize_track(t, opts) if t else None for t in rel_tracks]
         updated_tracks = [t for t in dest_tracks if t]
-        updated_track_count = other.update_tracks(updated_tracks)
+        updated_track_count = 0 if opts.dry_run else other.update_tracks(updated_tracks)
         if opts.log:
             print(f'==> Copied {updated_track_count} tracks')
 
         # Copy actual track files
-        zipped_tracks = [(t, d) for t, d in zip(tracks, dest_tracks) if t and d]
+        zipped_tracks = [] if opts.dry_run else [(t, d) for t, d in zip(tracks, dest_tracks) if t and d]
         with ProgressLine(len(zipped_tracks), final_newline=opts.log) as progress:
             for track, dest_track in zipped_tracks:
                 location = track.location
@@ -58,13 +58,13 @@ class Store:
         
         # Copy playlists
         playlists = list(self.playlists())
-        updated_playlist_count = other.update_playlists(playlists)
+        updated_playlist_count = 0 if opts.dry_run else other.update_playlists(playlists)
         if opts.log:
             print(f'==> Copied {updated_playlist_count} playlists')
         
         # Copy crates
         crates = list(self.crates())
-        updated_crate_count = other.update_crates(crates)
+        updated_crate_count = 0 if opts.dry_run else other.update_crates(crates)
         if opts.log:
             print(f'==> Copied {updated_crate_count} crates')
         
