@@ -18,6 +18,9 @@ class Store:
     def copy_to(self, other: Store, opts: Options):
         """Copies the contents of this store to the given other store."""
 
+        if opts.log:
+            print(f'==> Copying from a {type(self).__name__} to a {type(other).__name__}')
+
         # TODO: Deltas?
         # TODO: Add methods for matching tracks to existing tracks in the DB
         #       at the store level? Perhaps just more fine grained query methods?
@@ -32,7 +35,7 @@ class Store:
         updated_directories = [d for d in dest_directories if d]
         updated_directory_count = 0 if opts.dry_run else other.update_directories(updated_directories)
         if opts.log:
-            print(f'==> Copied {updated_directory_count} directories')
+            print(f'==> Copied {updated_directory_count} directory entries')
 
         # Copy track metadata
         tracks = list(self.tracks())
@@ -41,7 +44,7 @@ class Store:
         updated_tracks = [t for t in dest_tracks if t]
         updated_track_count = 0 if opts.dry_run else other.update_tracks(updated_tracks)
         if opts.log:
-            print(f'==> Copied {updated_track_count} tracks')
+            print(f'==> Copied {updated_track_count} track entries')
 
         # Copy actual track files
         zipped_tracks = [] if opts.dry_run else [(t, d) for t, d in zip(tracks, dest_tracks) if t and d]

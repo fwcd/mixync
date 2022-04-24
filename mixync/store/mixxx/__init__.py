@@ -136,6 +136,8 @@ class MixxxStore(Store):
         if not confirm(f"Map '{directory.location}' to '{matching_location}'?", opts):
             print('Okay, quitting')
             sys.exit(0)
+        if opts.log and opts.assume_yes:
+            print(f"Mapping '{directory.location}' to '{matching_location}'")
         new_directory.location = matching_location
         return new_directory
     
