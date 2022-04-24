@@ -128,7 +128,7 @@ class MixxxStore(Store):
         location = Path(directory.location)
         if not location.parts:
             raise ValueError('Cannot absolutize a directory with an empty location path.')
-        matching_location = self._find_matching_directory(location.parts[0])
+        matching_location = self._find_matching_directory(location.parts[0], opts)
         if not confirm(f"Map '{directory.location}' to '{matching_location}'?", opts):
             sys.exit(0)
         new_directory.location = matching_location
