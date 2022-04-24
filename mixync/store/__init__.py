@@ -5,7 +5,6 @@ from shutil import get_terminal_size
 from typing import Optional, Iterable
 
 from mixync.model.crate import Crate
-from mixync.model.cue import Cue
 from mixync.model.directory import Directory
 from mixync.model.playlist import Playlist
 from mixync.model.track import Track
