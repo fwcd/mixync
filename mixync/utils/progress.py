@@ -1,3 +1,6 @@
+from re import A
+
+
 class ProgressLine:
     """An abstraction for printing an updating progress line."""
 
@@ -16,13 +19,15 @@ class ProgressLine:
         if self.final_newline:
             print()
 
-    def print(self, msg: str):
+    def prefix(self):
         progress = (self.i + 1) / self.total
         steps = int(progress * self.bar_length)
         bar = f"[{'█' * steps + '░' * (self.bar_length - steps)}]" if self.with_bar else ''
+        return f'{bar} [{self.i + 1}/{self.total}]'
+
+    def print(self, msg: str):
         output = ' '.join(s for s in [
-            bar,
-            f'[{self.i + 1}/{self.total}]',
+            self.prefix(),
             msg,
             ' ' * (len(self.last_msg) - len(msg)),
         ] if s)

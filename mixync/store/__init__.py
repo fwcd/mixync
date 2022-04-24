@@ -1,6 +1,7 @@
 from __future__ import annotations
 from copy import deepcopy
 from pathlib import Path
+from shutil import get_terminal_size
 from typing import Optional, Iterable
 
 from mixync.model.crate import Crate
@@ -56,7 +57,11 @@ class Store:
                 raw = self.download_track(location)
                 other.upload_track(dest_location, raw)
                 if opts.log:
-                    progress.print(f"Copied '{truncate(Path(location).name, 40)}' ({len(raw) / 1_000_000} MB)")
+                    prefix = "Copied '"
+                    suffix = f"' ({len(raw) / 1_000_000} MB)"
+                    terminal_width = get_terminal_size((80, 20)).columns
+                    available_width = max(5, terminal_width - len(progress.prefix()) - len(prefix) - len(suffix) - 3)
+                    progress.print(prefix + truncate(Path(location).name, available_width) + suffix)
         if opts.log:
             info(f'Copied {len(zipped_tracks)} track files')
         
