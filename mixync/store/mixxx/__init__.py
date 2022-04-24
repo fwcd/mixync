@@ -106,6 +106,13 @@ class MixxxStore(Store):
         new_track.location = rel_location.as_posix()
         return new_track
     
+    def absolutize_directory(self, directory: Directory, opts: Options) -> Optional[Directory]:
+        new_directory = super().absolutize_directory(directory, opts)
+
+        return None
+    
+    # TODO: absolutize_track
+    
     def _make_model_id(self, id):
         h = hashlib.sha1()
         h.update(str(ID_HASH_BASE).encode())

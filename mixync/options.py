@@ -8,6 +8,8 @@ class Options:
     skip_uncategorized: bool = True
     # Whether to log output during the copy.
     log: bool = False
+    # Whether to disable interactive prompts.
+    assume_yes: bool = False
     # A root folder to place copied music directories in. Only used
     # by some stores. For example, when set to ~/Music/Mixync and when
     # copying to the @local Mixxx store, the directories would be placed
