@@ -24,7 +24,7 @@ def parse_ref(ref: str) -> Store:
     exit(1)
 
 def main():
-    parser = argparse.ArgumentParser(description='Tool for copying Mixxx databases with tracks in a portable manner')
+    parser = argparse.ArgumentParser(prog='mixync', description='Tool for copying Mixxx databases with tracks in a portable manner')
     parser.add_argument('source', help='The source ref (to be copied from)')
     parser.add_argument('dest', help='The destination ref (to be copied to)')
     parser.add_argument('-d', '--dest-root-dir', type=str, help='A root folder to place copied music directories in. Only used by some destination stores.')
