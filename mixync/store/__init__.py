@@ -9,6 +9,7 @@ from mixync.model.directory import Directory
 from mixync.model.playlist import Playlist
 from mixync.model.track import Track
 from mixync.options import Options
+from mixync.utils.cli import info
 from mixync.utils.progress import ProgressLine
 from mixync.utils.str import truncate
 
@@ -19,7 +20,7 @@ class Store:
         """Copies the contents of this store to the given other store."""
 
         if opts.log:
-            print(f'==> Copying from a {type(self).__name__} to a {type(other).__name__}')
+            info(f'Copying from a {type(self).__name__} to a {type(other).__name__}')
 
         # TODO: Deltas?
         # TODO: Add methods for matching tracks to existing tracks in the DB
@@ -35,7 +36,7 @@ class Store:
         updated_directories = [d for d in dest_directories if d]
         updated_directory_count = 0 if opts.dry_run else other.update_directories(updated_directories)
         if opts.log:
-            print(f'==> Copied {updated_directory_count} directory entries')
+            info(f'Copied {updated_directory_count} directory entries')
 
         # Copy track metadata
         tracks = list(self.tracks())
@@ -44,7 +45,7 @@ class Store:
         updated_tracks = [t for t in dest_tracks if t]
         updated_track_count = 0 if opts.dry_run else other.update_tracks(updated_tracks)
         if opts.log:
-            print(f'==> Copied {updated_track_count} track entries')
+            info(f'Copied {updated_track_count} track entries')
 
         # Copy actual track files
         zipped_tracks = [] if opts.dry_run else [(t, d) for t, d in zip(tracks, dest_tracks) if t and d]
@@ -57,19 +58,19 @@ class Store:
                 if opts.log:
                     progress.print(f"Copied '{truncate(Path(location).name, 40)}' ({len(raw) / 1_000_000} MB)")
         if opts.log:
-            print(f'==> Copied {len(zipped_tracks)} track files')
+            info(f'Copied {len(zipped_tracks)} track files')
         
         # Copy playlists
         playlists = list(self.playlists())
         updated_playlist_count = 0 if opts.dry_run else other.update_playlists(playlists)
         if opts.log:
-            print(f'==> Copied {updated_playlist_count} playlists')
+            info(f'Copied {updated_playlist_count} playlists')
         
         # Copy crates
         crates = list(self.crates())
         updated_crate_count = 0 if opts.dry_run else other.update_crates(crates)
         if opts.log:
-            print(f'==> Copied {updated_crate_count} crates')
+            info(f'Copied {updated_crate_count} crates')
         
     
     @classmethod

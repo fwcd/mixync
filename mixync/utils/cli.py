@@ -1,5 +1,19 @@
 from mixync.options import Options
 
+RED_COLOR = '\033[91m'
+YELLOW_COLOR = '\033[93m'
+BLUE_COLOR = '\033[36m'
+GRAY_COLOR = '\033[90m'
+GREEN_COLOR = '\033[92m'
+PINK_COLOR = '\033[95m'
+CLEAR_COLOR = '\033[0m'
+
+def message(msg: str, color: str=BLUE_COLOR):
+    print(f'{color}==> {msg}{CLEAR_COLOR}')
+
+def info(msg: str):
+    message(msg, BLUE_COLOR)
+
 def prompt(msg: str, choices: list[str], default: str, opts: Options):
     if opts.assume_yes:
         return default
