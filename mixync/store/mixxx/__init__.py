@@ -158,6 +158,7 @@ class MixxxStore(Store):
         with self.make_session() as session:
             for directory in session.query(MixxxDirectory):
                 yield Directory(
+                    id=None,
                     location=directory.directory
                 )
     
