@@ -81,6 +81,24 @@ class Store:
     def parse_ref(cls, ref: str):
         raise NotImplementedError(f'parse is not implemented for {cls.__name__}!')
     
+    # Match methods
+
+    def match_tracks(self, tracks: list[Track]) -> list[Optional[int]]:
+        """Fetches a list of track ids that match."""
+        return [None for _ in tracks]
+
+    def match_crates(self, crates: list[Crate]) -> list[Optional[int]]:
+        """Fetches a list of crate ids that match."""
+        return [None for _ in crates]
+    
+    def match_playlists(self, playlists: list[Playlist]) -> list[Optional[int]]:
+        """Fetches a list of playlist ids that match."""
+        return [None for _ in playlists]
+
+    def match_directories(self, directories: list[Directory]) -> list[Optional[int]]:
+        """Fetches a list of directory ids that match."""
+        return [None for _ in directories]
+
     # Query methods
 
     def tracks(self, name: Optional[str]=None, artist: Optional[str]=None) -> Iterable[Track]:
