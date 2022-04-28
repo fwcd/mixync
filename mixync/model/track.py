@@ -11,7 +11,7 @@ from mixync.model.keys import Keys
 class Track:
     """A song."""
 
-    id: str = field(default_factory=lambda: str(uuid4())) # a globally unique id (e.g. UUID, SHA1, ...) independent of Mixxx's id scheme
+    id: int
     title: str = ''
     artist: str = ''
     location: str = ''
