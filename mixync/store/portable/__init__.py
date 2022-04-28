@@ -121,7 +121,6 @@ class PortableStore(Store):
         with self.make_session() as session:
             for directory in session.query(PortableDirectory):
                 yield Directory(
-                    id=directory.id,
                     location=directory.location
                 )
     

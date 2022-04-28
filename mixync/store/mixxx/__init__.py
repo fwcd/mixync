@@ -37,28 +37,36 @@ MIXXXDIR_PATHS = [
     Path.home() / 'AppData' / 'Local' / 'Mixxx',
 ]
 
-def find_local_mixxxdir() -> Path:
+def find_local_mixxxdir() -> Optional[Path]:
     for path in MIXXXDIR_PATHS:
         if path.is_dir():
             return path
     return None
 
-LOCAL_MIXXXDB_PATH = find_local_mixxxdir() / 'mixxxdb.sqlite'
+def find_local_mixxxdb() -> Optional[Path]:
+    mixxxdir = find_local_mixxxdir()
+    if not mixxxdir:
+        return None
+    return mixxxdir / 'mixxxdb.sqlite'
+
 MIN_SCHEMA_VERSION = 32
 
 class MixxxStore(Store):
     """A wrapper around the user's local mixxxdb."""
 
-    def __init__(self, path: Path=LOCAL_MIXXXDB_PATH):
+    def __init__(self, path: Optional[Path]=None):
+        path = path or find_local_mixxxdb()
+        if not path:
+            raise RuntimeError('No mixxxdb found')
         engine = create_engine(f'sqlite:///{path}')
         self.make_session = sessionmaker(bind=engine, expire_on_commit=False)
 
-        schema_version = self._schema_version()
+        schema_version = self._schema_version() or 0
         if schema_version < MIN_SCHEMA_VERSION:
             raise RuntimeError(f'Mixxxdb has schema version {schema_version}, but the minimum version supported by mixync is {MIN_SCHEMA_VERSION}.')
     
-    @staticmethod
-    def parse_ref(ref: str):
+    @classmethod
+    def parse_ref(cls, ref: str):
         if ref == '@local':
             return MixxxStore()
         try:
@@ -94,12 +102,16 @@ class MixxxStore(Store):
     def relativize_directory(self, directory: Directory, opts: Options) -> Optional[Directory]:
         # TODO: Handle case where user may have multiple directories with same name?
         new_directory = super().relativize_directory(directory, opts)
+        if not new_directory:
+            return None
         new_directory.location = Path(directory.location).name
         return new_directory
 
     def relativize_track(self, track: Track, opts: Options) -> Optional[Track]:
         # Relativize w.r.t a base directory from the db and POSIX-ify paths
         new_track = super().relativize_track(track, opts)
+        if not new_track:
+            return None
         location = Path(track.location)
         base_directory = self._find_base_directory(location, opts)
         if not base_directory:
@@ -126,6 +138,8 @@ class MixxxStore(Store):
 
     def absolutize_directory(self, directory: Directory, opts: Options) -> Optional[Directory]:
         new_directory = super().absolutize_directory(directory, opts)
+        if not new_directory:
+            return None
         location = Path(directory.location)
         if not location.parts:
             raise ValueError('Cannot absolutize a directory with an empty location path.')
@@ -135,7 +149,7 @@ class MixxxStore(Store):
             sys.exit(0)
         if opts.log and opts.assume_yes:
             print(f"Mapping '{directory.location}' to '{matching_location}'")
-        new_directory.location = matching_location
+        new_directory.location = str(matching_location)
         return new_directory
     
     # TODO: absolutize_track
@@ -211,7 +225,7 @@ class MixxxStore(Store):
                     id=crate.id,
                     name=crate.name,
                     locked=bool(crate.locked),
-                    track_ids=[t.track_id for t in session.query(MixxxCrateTrack).where(MixxxCrateTrack.crate_id == crate.id)]
+                    track_ids={t.track_id for t in session.query(MixxxCrateTrack).where(MixxxCrateTrack.crate_id == crate.id)}
                 )
     
     def playlists(self, name: Optional[str]=None) -> Iterable[Playlist]:

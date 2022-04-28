@@ -16,7 +16,7 @@ class Crate:
     date_modified: datetime = field(default_factory=datetime.now)
     hidden: bool = False
     locked: bool = False
-    track_ids: set[str] = field(default_factory=lambda: {})
+    track_ids: set[str] = field(default_factory=lambda: set())
 
     def header(self) -> CrateHeader:
         return CrateHeader(

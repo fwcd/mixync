@@ -1,6 +1,5 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
-from uuid import uuid4
 
 from mixync.model.cue_type import CueType
 
