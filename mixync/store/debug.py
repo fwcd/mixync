@@ -27,7 +27,7 @@ class DebugStore(Store):
     
     def update_tracks(self, tracks: list[Track]) -> int:
         for track in tracks:
-            print(track.title if self.compact else track)
+            print(track.name if self.compact else track)
         return len(tracks)
 
     def update_crates(self, crates: list[Crate]) -> int:

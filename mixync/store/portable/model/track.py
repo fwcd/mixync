@@ -8,7 +8,7 @@ class PortableTrack(Base):
     __table_args__ = {'sqlite_autoincrement': True}
 
     id = Column(Integer, primary_key=True)
-    title = Column(Text, default='', nullable=False)
+    name = Column(Text, default='', nullable=False)
     artist = Column(Text, default='', nullable=False)
     location = Column(Text, default='', nullable=False)
     album = Column(Text, default='', nullable=False)

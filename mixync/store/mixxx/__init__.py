@@ -163,7 +163,7 @@ class MixxxStore(Store):
                 if location and not location.fs_deleted:
                     yield Track(
                         id=track.id,
-                        title=track.title or '',
+                        name=track.title or '',
                         artist=track.artist or '',
                         location=location.location or '',
                         album=track.album or '',

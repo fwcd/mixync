@@ -59,7 +59,7 @@ class PortableStore(Store):
             for track in session.query(PortableTrack).where(*constraints):
                 yield Track(
                     id=track.id,
-                    title=track.title,
+                    name=track.title,
                     artist=track.artist,
                     location=track.location,
                     album=track.album,
@@ -134,8 +134,8 @@ class PortableStore(Store):
         with self.make_session.begin() as session:
             for track in tracks:
                 new_track = session.merge(PortableTrack(
-                    id=self.track_id_mappings.get(track.id, None) or self._query_id(session, PortableTrack, PortableTrack.title == track.title, PortableTrack.artist == track.artist),
-                    title=track.title,
+                    id=self.track_id_mappings.get(track.id, None) or self._query_id(session, PortableTrack, PortableTrack.name == track.name, PortableTrack.artist == track.artist),
+                    name=track.name,
                     artist=track.artist,
                     location=track.location,
                     album=track.album,

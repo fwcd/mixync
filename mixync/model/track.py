@@ -9,7 +9,7 @@ from mixync.model.keys import Keys
 @dataclass
 class TrackHeader:
     id: int
-    title: str
+    name: str
     artist: str
 
 @dataclass
@@ -17,7 +17,7 @@ class Track:
     """A song."""
 
     id: int
-    title: str = ''
+    name: str = ''
     artist: str = ''
     location: str = ''
     album: str = ''
@@ -43,6 +43,6 @@ class Track:
     def header(self) -> TrackHeader:
         return TrackHeader(
             id=self.id,
-            title=self.title,
+            name=self.name,
             artist=self.artist
         )
