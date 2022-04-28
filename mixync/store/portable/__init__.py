@@ -32,7 +32,7 @@ class PortableStore(Store):
 
         self._create_tables()
 
-        self.previous_id_mappings = {}
+        self.id_mappings = {}
 
     @staticmethod
     def parse_ref(ref: str):
@@ -68,7 +68,6 @@ class PortableStore(Store):
                     url=track.url,
                     sample_rate=track.sample_rate,
                     cues=[Cue(
-                        id=cue.id,
                         type=cue.type,
                         position_ms=cue.position_ms,
                         length_ms=cue.length_ms,
@@ -123,22 +122,16 @@ class PortableStore(Store):
                     location=directory.location
                 )
     
-    def _model_to_portable_id(self, session, cls, id, *constraints) -> str:
-        mapped_id = self.previous_id_mappings.get(id, None)
-        if mapped_id:
-            return mapped_id
-        existing = session.query(cls).where(*constraints).first()
-        new_id = existing.id if existing and existing.id else id
-        self.previous_id_mappings[id] = new_id
-        return new_id
-    
+    def _query_id(self, session, cls, *constraints):
+        row = session.query(cls).where(*constraints).first()
+        return row.id if row else None
+
     def update_tracks(self, tracks: list[Track]) -> int:
         count = 0
         with self.make_session.begin() as session:
             for track in tracks:
-                id = self._model_to_portable_id(session, PortableTrack, track.id, PortableTrack.title == track.title, PortableTrack.artist == track.artist)
-                session.merge(PortableTrack(
-                    id=id,
+                id = session.merge(PortableTrack(
+                    id=self.id_mappings.get(track.id, None) or self._query_id(session, PortableTrack, PortableTrack.title == track.title, PortableTrack.artist == track.artist),
                     title=track.title,
                     artist=track.artist,
                     location=track.location,
@@ -162,12 +155,13 @@ class PortableStore(Store):
                     keys_version=track.keys.version if track.keys else None,
                     keys_sub_version=track.keys.sub_version if track.keys else None,
                     color=track.color
-                ))
+                )).id
+                self.id_mappings[track.id] = id
+                # TODO: More sophisticated cue merging strategy?
                 if track.cues:
                     session.execute(delete(PortableCue).where(PortableCue.track_id == id))
                 for cue in track.cues:
                     session.merge(PortableCue(
-                        id=cue.id,
                         type=cue.type,
                         position_ms=cue.position_ms,
                         length_ms=cue.length_ms,
@@ -183,11 +177,11 @@ class PortableStore(Store):
         count = 0
         with self.make_session.begin() as session:
             for directory in directories:
-                id = self._model_to_portable_id(session, PortableDirectory, directory.id, PortableDirectory.location == directory.location)
-                session.merge(PortableDirectory(
-                    id=id,
+                id = session.merge(PortableDirectory(
+                    id=self.id_mappings[directory.id] or self._query_id(session, PortableDirectory, PortableDirectory.location == directory.location),
                     location=directory.location
-                ))
+                )).id
+                self.id_mappings[directory.id] = id
                 count += 1
         return count
 
@@ -195,19 +189,19 @@ class PortableStore(Store):
         count = 0
         with self.make_session.begin() as session:
             for crate in crates:
-                id = self._model_to_portable_id(session, PortableCrate, crate.id, PortableCrate.name == crate.name)
-                session.merge(PortableCrate(
-                    id=id,
+                id = session.merge(PortableCrate(
+                    id=self.id_mappings[crate.id] or self._query_id(session, PortableCrate, PortableCrate.name == crate.name),
                     name=crate.name,
                     date_created=crate.date_created,
                     date_modified=crate.date_modified,
                     locked=crate.locked
-                ))
+                )).id
+                self.id_mappings[crate.id] = id
                 for track_id in crate.track_ids:
                     # TODO: Delete old tracks?
                     session.merge(PortableCrateTrack(
                         crate_id=id,
-                        track_id=self._model_to_portable_id(session, PortableTrack, track_id)
+                        track_id=self.id_mappings[track_id]
                     ))
                 count += 1
         return count
@@ -216,21 +210,21 @@ class PortableStore(Store):
         count = 0
         with self.make_session.begin() as session:
             for playlist in playlists:
-                id = self._model_to_portable_id(session, PortablePlaylist, playlist.id, PortablePlaylist.name == playlist.name)
-                session.merge(PortablePlaylist(
-                    id=id,
+                id = session.merge(PortablePlaylist(
+                    id=self.id_mappings[playlist.id] or self._query_id(session, PortablePlaylist, PortablePlaylist.name == playlist.name),
                     name=playlist.name,
                     position=playlist.position,
                     date_created=playlist.date_created,
                     date_modified=playlist.date_modified,
                     type=playlist.type,
                     locked=playlist.locked
-                ))
+                )).id
+                self.id_mappings[playlist.id] = id
                 session.execute(delete(PortablePlaylistTrack).where(PortablePlaylistTrack.playlist_id == id))
                 for i, track_id in enumerate(playlist.track_ids):
                     session.merge(PortablePlaylistTrack(
                         playlist_id=playlist.id,
-                        track_id=self._model_to_portable_id(session, PortableTrack, track_id),
+                        track_id=self.id_mappings[track_id],
                         position=i
                     ))
                 count += 1
