@@ -1,11 +1,12 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, make_transient
+from sqlalchemy.orm import sessionmaker
+from hashlib import sha1
 from pathlib import Path
-from typing import Iterable, Optional, Type, TypeVar
+from typing import Iterable, Optional, TypeVar
 
 import sys
-from mixync.model.beats import Beats
 
+from mixync.model.beats import Beats
 from mixync.model.crate import Crate
 from mixync.model.cue import Cue
 from mixync.model.directory import Directory
@@ -158,7 +159,7 @@ class MixxxStore(Store):
         with self.make_session() as session:
             for directory in session.query(MixxxDirectory):
                 yield Directory(
-                    id=None,
+                    id=int(sha1(directory.directory.encode('utf8')).hexdigest(), 16),
                     location=directory.directory
                 )
     

@@ -5,5 +5,5 @@ from typing import Optional
 class Directory:
     """A music directory containing audio files."""
 
-    id: Optional[int]
+    id: int
     location: str
