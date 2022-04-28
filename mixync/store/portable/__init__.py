@@ -207,10 +207,14 @@ class PortableStore(Store):
                 self.crate_id_mappings[crate.id] = id
                 for track_id in crate.track_ids:
                     # TODO: Delete old tracks?
-                    session.merge(PortableCrateTrack(
-                        crate_id=id,
-                        track_id=self.track_id_mappings.get(track_id, None)
-                    ))
+                    id = self.track_id_mappings.get(track_id, None)
+                    if id:
+                        session.merge(PortableCrateTrack(
+                            crate_id=new_crate.id,
+                            track_id=id
+                        ))
+                    else:
+                        print(f"Warning: Skipping unmapped track id {track_id} in crate '{crate.name}'")
                 count += 1
         return count
 
@@ -232,11 +236,15 @@ class PortableStore(Store):
                 self.playlist_id_mappings[playlist.id] = id
                 session.execute(delete(PortablePlaylistTrack).where(PortablePlaylistTrack.playlist_id == id))
                 for i, track_id in enumerate(playlist.track_ids):
-                    session.merge(PortablePlaylistTrack(
-                        playlist_id=playlist.id,
-                        track_id=self.track_id_mappings.get(track_id, None),
-                        position=i
-                    ))
+                    id = self.track_id_mappings.get(track_id, None)
+                    if id:
+                        session.merge(PortablePlaylistTrack(
+                            playlist_id=new_playlist.id,
+                            track_id=id,
+                            position=i
+                        ))
+                    else:
+                        print(f"Warning: Skipping unmapped track id {track_id} in playlist '{playlist.name}'")
                 count += 1
         return count
 
