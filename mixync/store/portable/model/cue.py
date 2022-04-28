@@ -4,6 +4,7 @@ from mixync.store.portable.model import Base
 
 class PortableCue(Base):
     __tablename__ = 'cues'
+    __table_args__ = {'sqlite_autoincrement': True}
 
     id = Column(Integer, primary_key=True)
     track_id = Column(ForeignKey('tracks.id'), nullable=False)

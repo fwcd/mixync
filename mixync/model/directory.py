@@ -5,6 +5,5 @@ from uuid import uuid4
 class Directory:
     """A music directory containing audio files."""
 
-    id: int
     location: str = ''
 

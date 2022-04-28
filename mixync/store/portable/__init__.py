@@ -32,7 +32,10 @@ class PortableStore(Store):
 
         self._create_tables()
 
-        self.id_mappings = {}
+        self.track_id_mappings = {}
+        self.directory_id_mappings = {}
+        self.crate_id_mappings = {}
+        self.playlist_id_mappings = {}
 
     @staticmethod
     def parse_ref(ref: str):
@@ -122,7 +125,7 @@ class PortableStore(Store):
                     location=directory.location
                 )
     
-    def _query_id(self, session, cls, *constraints):
+    def _query_id(self, session, cls, *constraints) -> Optional[int]:
         row = session.query(cls).where(*constraints).first()
         return row.id if row else None
 
@@ -130,8 +133,8 @@ class PortableStore(Store):
         count = 0
         with self.make_session.begin() as session:
             for track in tracks:
-                id = session.merge(PortableTrack(
-                    id=self.id_mappings.get(track.id, None) or self._query_id(session, PortableTrack, PortableTrack.title == track.title, PortableTrack.artist == track.artist),
+                new_track = session.merge(PortableTrack(
+                    id=self.track_id_mappings.get(track.id, None) or self._query_id(session, PortableTrack, PortableTrack.title == track.title, PortableTrack.artist == track.artist),
                     title=track.title,
                     artist=track.artist,
                     location=track.location,
@@ -155,8 +158,10 @@ class PortableStore(Store):
                     keys_version=track.keys.version if track.keys else None,
                     keys_sub_version=track.keys.sub_version if track.keys else None,
                     color=track.color
-                )).id
-                self.id_mappings[track.id] = id
+                ))
+                session.flush()
+                id = new_track.id
+                self.track_id_mappings[track.id] = id
                 # TODO: More sophisticated cue merging strategy?
                 if track.cues:
                     session.execute(delete(PortableCue).where(PortableCue.track_id == id))
@@ -177,11 +182,12 @@ class PortableStore(Store):
         count = 0
         with self.make_session.begin() as session:
             for directory in directories:
-                id = session.merge(PortableDirectory(
-                    id=self.id_mappings[directory.id] or self._query_id(session, PortableDirectory, PortableDirectory.location == directory.location),
+                new_directory = session.merge(PortableDirectory(
+                    id=self.directory_id_mappings.get(directory.location, None) or self._query_id(session, PortableDirectory, PortableDirectory.location == directory.location),
                     location=directory.location
-                )).id
-                self.id_mappings[directory.id] = id
+                ))
+                session.flush()
+                self.directory_id_mappings[directory.location] = new_directory.id
                 count += 1
         return count
 
@@ -189,19 +195,21 @@ class PortableStore(Store):
         count = 0
         with self.make_session.begin() as session:
             for crate in crates:
-                id = session.merge(PortableCrate(
-                    id=self.id_mappings[crate.id] or self._query_id(session, PortableCrate, PortableCrate.name == crate.name),
+                new_crate = session.merge(PortableCrate(
+                    id=self.crate_id_mappings.get(crate.id, None) or self._query_id(session, PortableCrate, PortableCrate.name == crate.name),
                     name=crate.name,
                     date_created=crate.date_created,
                     date_modified=crate.date_modified,
                     locked=crate.locked
-                )).id
-                self.id_mappings[crate.id] = id
+                ))
+                session.flush()
+                id = new_crate.id
+                self.crate_id_mappings[crate.id] = id
                 for track_id in crate.track_ids:
                     # TODO: Delete old tracks?
                     session.merge(PortableCrateTrack(
                         crate_id=id,
-                        track_id=self.id_mappings[track_id]
+                        track_id=self.track_id_mappings.get(track_id, None)
                     ))
                 count += 1
         return count
@@ -210,21 +218,23 @@ class PortableStore(Store):
         count = 0
         with self.make_session.begin() as session:
             for playlist in playlists:
-                id = session.merge(PortablePlaylist(
-                    id=self.id_mappings[playlist.id] or self._query_id(session, PortablePlaylist, PortablePlaylist.name == playlist.name),
+                new_playlist = session.merge(PortablePlaylist(
+                    id=self.playlist_id_mappings.get(playlist.id, None) or self._query_id(session, PortablePlaylist, PortablePlaylist.name == playlist.name),
                     name=playlist.name,
                     position=playlist.position,
                     date_created=playlist.date_created,
                     date_modified=playlist.date_modified,
                     type=playlist.type,
                     locked=playlist.locked
-                )).id
-                self.id_mappings[playlist.id] = id
+                ))
+                session.flush()
+                id = new_playlist.id
+                self.playlist_id_mappings[playlist.id] = id
                 session.execute(delete(PortablePlaylistTrack).where(PortablePlaylistTrack.playlist_id == id))
                 for i, track_id in enumerate(playlist.track_ids):
                     session.merge(PortablePlaylistTrack(
                         playlist_id=playlist.id,
-                        track_id=self.id_mappings[track_id],
+                        track_id=self.track_id_mappings.get(track_id, None),
                         position=i
                     ))
                 count += 1

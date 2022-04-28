@@ -5,6 +5,7 @@ from mixync.store.portable.model import Base
 
 class PortableTrack(Base):
     __tablename__ = 'tracks'
+    __table_args__ = {'sqlite_autoincrement': True}
 
     id = Column(Integer, primary_key=True)
     title = Column(Text, default='', nullable=False)

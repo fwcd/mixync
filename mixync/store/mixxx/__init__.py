@@ -3,8 +3,6 @@ from sqlalchemy.orm import sessionmaker, make_transient
 from pathlib import Path
 from typing import Iterable, Optional, Type, TypeVar
 
-import hashlib
-import random
 import sys
 from mixync.model.beats import Beats
 
@@ -28,7 +26,6 @@ from mixync.options import Options
 from mixync.utils.cli import confirm
 
 T = TypeVar('T')
-ID_HASH_BASE = random.getrandbits(64)
 
 MIXXXDIR_PATHS = [
     # Linux
@@ -143,17 +140,10 @@ class MixxxStore(Store):
     
     # TODO: absolutize_track
     
-    def _make_model_id(self, id):
-        h = hashlib.sha1()
-        h.update(str(ID_HASH_BASE).encode())
-        h.update(str(id).encode())
-        return h.hexdigest()
-
     def directories(self) -> Iterable[Directory]:
         with self.make_session() as session:
             for directory in session.query(MixxxDirectory):
                 yield Directory(
-                    id=self._make_model_id(directory.directory),
                     location=directory.directory
                 )
     
@@ -172,7 +162,7 @@ class MixxxStore(Store):
                 location = session.query(MixxxTrackLocation).where(MixxxTrackLocation.id == track.location).first()
                 if location and not location.fs_deleted:
                     yield Track(
-                        id=self._make_model_id(track.id),
+                        id=track.id,
                         title=track.title or '',
                         artist=track.artist or '',
                         location=location.location or '',
@@ -184,15 +174,14 @@ class MixxxStore(Store):
                         track_number=track.tracknumber,
                         url=track.url,
                         sample_rate=track.samplerate,
-                        cues=list(Cue(
-                            id=self._make_model_id(c.id),
+                        cues=[Cue(
                             type=c.type,
                             position_ms=sample_to_ms(c.position),
                             length_ms=sample_to_ms(c.length),
                             hotcue=c.hotcue if c.hotcue >= 0 else None,
                             label=c.label if c.label else None,
                             color=c.color
-                        ) for c in session.query(MixxxCue).where(MixxxCue.track_id == track.id)),
+                        ) for c in session.query(MixxxCue).where(MixxxCue.track_id == track.id)],
                         bpm=track.bpm,
                         beats=Beats(
                             data=track.beats,
@@ -219,13 +208,10 @@ class MixxxStore(Store):
             for crate in session.query(MixxxCrate).where(*constraints):
                 # TODO: Proper creation/modification dates?
                 yield Crate(
-                    id=self._make_model_id(crate.id),
+                    id=crate.id,
                     name=crate.name,
                     locked=bool(crate.locked),
-                    track_ids=list(
-                        self._make_model_id(t.track_id)
-                        for t in session.query(MixxxCrateTrack).where(MixxxCrateTrack.crate_id == crate.id)
-                    )
+                    track_ids=[t.track_id for t in session.query(MixxxCrateTrack).where(MixxxCrateTrack.crate_id == crate.id)]
                 )
     
     def playlists(self, name: Optional[str]=None) -> Iterable[Playlist]:
@@ -235,17 +221,14 @@ class MixxxStore(Store):
             ] if c]
             for playlist in session.query(MixxxPlaylist).where(*constraints):
                 yield Playlist(
-                    id=self._make_model_id(playlist.id),
+                    id=playlist.id,
                     name=playlist.name,
                     position=playlist.position,
                     date_created=playlist.date_created,
                     date_modified=playlist.date_modified,
                     type=playlist.hidden,
                     locked=bool(playlist.locked),
-                    track_ids=list(
-                        self._make_model_id(t.id)
-                        for t in session.query(MixxxPlaylistTrack).where(MixxxPlaylistTrack.playlist_id == playlist.id)
-                    )
+                    track_ids=[t.id for t in session.query(MixxxPlaylistTrack).where(MixxxPlaylistTrack.playlist_id == playlist.id)]
                 )
     
     # TODO: Update methods and upload

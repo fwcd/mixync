@@ -5,6 +5,7 @@ from mixync.store.portable.model import Base
 
 class PortableCrate(Base):
     __tablename__ = 'crates'
+    __table_args__ = {'sqlite_autoincrement': True}
 
     id = Column(Integer, primary_key=True)
     name = Column(Text, unique=True, nullable=False)
