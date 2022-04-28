@@ -6,6 +6,11 @@ from uuid import uuid4
 from mixync.model.playlist_type import PlaylistType
 
 @dataclass
+class PlaylistHeader:
+    id: int
+    name: str
+
+@dataclass
 class Playlist:
     """An ordered list of tracks."""
 
@@ -17,3 +22,9 @@ class Playlist:
     type: PlaylistType = PlaylistType.DEFAULT
     locked: bool = False
     track_ids: list[str] = field(default_factory=lambda: [])
+
+    def header(self) -> PlaylistHeader:
+        return PlaylistHeader(
+            id=self.id,
+            name=self.name
+        )

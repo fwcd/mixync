@@ -1,6 +1,10 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from uuid import uuid4
+
+@dataclass
+class CrateHeader:
+    id: int
+    name: str
 
 @dataclass
 class Crate:
@@ -13,3 +17,9 @@ class Crate:
     hidden: bool = False
     locked: bool = False
     track_ids: set[str] = field(default_factory=lambda: {})
+
+    def header(self) -> CrateHeader:
+        return CrateHeader(
+            id=self.id,
+            name=self.name
+        )

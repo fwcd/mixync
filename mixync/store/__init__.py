@@ -4,10 +4,10 @@ from pathlib import Path
 from shutil import get_terminal_size
 from typing import Optional, Iterable
 
-from mixync.model.crate import Crate
+from mixync.model.crate import Crate, CrateHeader
 from mixync.model.directory import Directory
-from mixync.model.playlist import Playlist
-from mixync.model.track import Track
+from mixync.model.playlist import Playlist, PlaylistHeader
+from mixync.model.track import Track, TrackHeader
 from mixync.options import Options
 from mixync.utils.cli import info
 from mixync.utils.progress import ProgressLine
@@ -83,15 +83,15 @@ class Store:
     
     # Match methods
 
-    def match_tracks(self, tracks: list[Track]) -> list[Optional[int]]:
+    def match_tracks(self, tracks: list[TrackHeader]) -> list[Optional[int]]:
         """Fetches a list of track ids that match."""
         return [None for _ in tracks]
 
-    def match_crates(self, crates: list[Crate]) -> list[Optional[int]]:
+    def match_crates(self, crates: list[CrateHeader]) -> list[Optional[int]]:
         """Fetches a list of crate ids that match."""
         return [None for _ in crates]
     
-    def match_playlists(self, playlists: list[Playlist]) -> list[Optional[int]]:
+    def match_playlists(self, playlists: list[PlaylistHeader]) -> list[Optional[int]]:
         """Fetches a list of playlist ids that match."""
         return [None for _ in playlists]
 

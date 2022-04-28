@@ -1,11 +1,16 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from uuid import uuid4
 from typing import Optional
 
 from mixync.model.beats import Beats
 from mixync.model.cue import Cue
 from mixync.model.keys import Keys
+
+@dataclass
+class TrackHeader:
+    id: int
+    title: str
+    artist: str
 
 @dataclass
 class Track:
@@ -34,3 +39,10 @@ class Track:
     rating: Optional[int] = None
     color: Optional[int] = None
     last_played_at: Optional[datetime] = None
+
+    def header(self) -> TrackHeader:
+        return TrackHeader(
+            id=self.id,
+            title=self.title,
+            artist=self.artist
+        )
