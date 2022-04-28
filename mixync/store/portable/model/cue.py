@@ -1,11 +1,11 @@
-from sqlalchemy import Column, Integer, ForeignKey, Text
+from sqlalchemy import Column, Integer, ForeignKey, Text, Integer
 
 from mixync.store.portable.model import Base
 
 class PortableCue(Base):
     __tablename__ = 'cues'
 
-    id = Column(Text, primary_key=True)
+    id = Column(Integer, primary_key=True)
     track_id = Column(ForeignKey('tracks.id'), nullable=False)
     type = Column(Integer, default=0, nullable=False)
     position_ms = Column(Integer, nullable=True)

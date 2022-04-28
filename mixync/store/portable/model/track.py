@@ -6,7 +6,7 @@ from mixync.store.portable.model import Base
 class PortableTrack(Base):
     __tablename__ = 'tracks'
 
-    id = Column(Text, primary_key=True)
+    id = Column(Integer, primary_key=True)
     title = Column(Text, default='', nullable=False)
     artist = Column(Text, default='', nullable=False)
     location = Column(Text, default='', nullable=False)
