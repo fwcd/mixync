@@ -1,5 +1,6 @@
 from __future__ import annotations
 from copy import deepcopy
+from dataclasses import replace
 from pathlib import Path
 from shutil import get_terminal_size
 from typing import Optional, Iterable
@@ -49,7 +50,9 @@ class Store:
         rel_directories = [self.relativize_directory(d, opts) for d in directories]
         dest_directories = [other.absolutize_directory(d, opts) if d else None for d in rel_directories]
         updated_directories = [d for d in dest_directories if d]
-        updated_directory_count = 0 if opts.dry_run else other.update_directories(updated_directories)
+        directory_ids = self.match_directories(updated_directories)
+        mapped_directories = [replace(d, id=id) for d, id in zip(updated_directories, directory_ids)]
+        updated_directory_count = 0 if opts.dry_run else other.update_directories(mapped_directories)
         if opts.log:
             info(f'Copied {updated_directory_count} directory entries')
 
@@ -59,7 +62,9 @@ class Store:
         rel_tracks = [self.relativize_track(t, opts) for t in tracks]
         dest_tracks = [other.absolutize_track(t, opts) if t else None for t in rel_tracks]
         updated_tracks = [t for t in dest_tracks if t]
-        updated_track_count = 0 if opts.dry_run else other.update_tracks(updated_tracks)
+        track_ids = self.match_tracks([t.header() for t in updated_tracks])
+        mapped_tracks = [replace(t, id=id) for t, id in zip(updated_tracks, track_ids)]
+        updated_track_count = 0 if opts.dry_run else other.update_tracks(mapped_tracks)
         if opts.log:
             info(f'Copied {updated_track_count} track entries')
         return tracks, dest_tracks
@@ -85,14 +90,20 @@ class Store:
     def copy_playlists_to(self, other: Store, opts: Options):
         """Copies playlists to the given store."""
         playlists = list(self.playlists())
-        updated_playlist_count = 0 if opts.dry_run else other.update_playlists(playlists)
+        playlist_ids = self.match_playlists([p.header() for p in playlists])
+        # TODO: Map track ids
+        mapped_playlists = [replace(p, id=id) for p, id in zip(playlists, playlist_ids)]
+        updated_playlist_count = 0 if opts.dry_run else other.update_playlists(mapped_playlists)
         if opts.log:
             info(f'Copied {updated_playlist_count} playlists')
     
     def copy_crates_to(self, other: Store, opts: Options):
         """Copies crates to the given store."""
         crates = list(self.crates())
-        updated_crate_count = 0 if opts.dry_run else other.update_crates(crates)
+        crate_ids = self.match_crates([c.header() for c in crates])
+        # TODO: Map track ids
+        mapped_crates = [replace(c, id=id) for c, id in zip(crates, crate_ids)]
+        updated_crate_count = 0 if opts.dry_run else other.update_crates(mapped_crates)
         if opts.log:
             info(f'Copied {updated_crate_count} crates')
 
