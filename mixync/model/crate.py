@@ -1,16 +1,17 @@
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Optional
 
 @dataclass
 class CrateHeader:
-    id: int
+    id: Optional[int]
     name: str
 
 @dataclass
 class Crate:
     """An unordered list of tracks."""
 
-    id: int
+    id: Optional[int]
     name: str = ''
     date_created: datetime = field(default_factory=datetime.now)
     date_modified: datetime = field(default_factory=datetime.now)

@@ -1,6 +1,7 @@
-from typing import Optional, TypeVar, Any
+from typing import Callable, Optional, TypeVar, Any
 
 T = TypeVar('T')
+U = TypeVar('U')
 
 def zip_or(xs: list[Optional[T]], ys: list[Optional[T]]) -> list[Optional[T]]:
     return [x or y for x, y in zip(xs, ys)]
@@ -14,3 +15,6 @@ def uncompact(xs: list[T], pattern: list[Optional[Any]]) -> list[Optional[T]]:
     for p in pattern:
         ys.append(next(it) if p else None)
     return ys
+
+def with_compact(f: Callable[[list[T]], list[U]], xs: list[Optional[T]]) -> list[Optional[U]]:
+    return uncompact(f(compact(xs)), xs)

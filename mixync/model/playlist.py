@@ -1,20 +1,19 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
-from uuid import uuid4
 
 from mixync.model.playlist_type import PlaylistType
 
 @dataclass
 class PlaylistHeader:
-    id: int
+    id: Optional[int]
     name: str
 
 @dataclass
 class Playlist:
     """An ordered list of tracks."""
 
-    id: int
+    id: Optional[int]
     name: str = ''
     position: Optional[int] = None
     date_created: datetime = field(default_factory=datetime.now)
