@@ -40,4 +40,5 @@ class ProgressLine:
         print(f'\r{self.current()}', end='', flush=True)
     
     def print(self, msg: str):
-        print(f"\r{' ' * len(self.last_msg)}{msg}\n{self.current()}", end='', flush=True)
+        print(f"\r{msg}{' ' * (len(self.last_msg) - len(msg))}\n{self.current()}", end='', flush=True)
+        self.last_msg = msg
