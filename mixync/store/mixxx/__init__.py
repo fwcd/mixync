@@ -430,5 +430,6 @@ class MixxxStore(Store):
             return f.read()
         
     def upload_track(self, location: str, raw: bytes):
+        Path(location).parent.mkdir(parents=True, exist_ok=True)
         with open(location, 'wb') as f:
             f.write(raw)
