@@ -270,7 +270,7 @@ class MixxxStore(Store):
                 yield self._query_id(
                     session,
                     MixxxDirectory,
-                    MixxxDirectory.location == directory.location
+                    MixxxDirectory.directory == directory.location
                 )
     
     def match_playlists(self, playlists: list[PlaylistHeader]) -> Iterable[Optional[int]]:
