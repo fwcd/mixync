@@ -310,7 +310,7 @@ class MixxxStore(Store):
                 path = Path(track.location).resolve()
                 location = session.query(MixxxTrackLocation).where(MixxxTrackLocation.location == track.location).first()
                 if not location:
-                    location = session.add(MixxxTrackLocation(
+                    location = session.merge(MixxxTrackLocation(
                         location=track.location,
                         filename=path.name,
                         directory=str(path.parent),
