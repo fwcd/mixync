@@ -90,7 +90,7 @@ class Store:
         dest_directories = [other.absolutize_directory(d, opts) if d else None for d in rel_directories]
         updated_directories = [d for d in dest_directories if d]
         # Map the ids (by first looking up already known mappings, then matching)
-        mapped_directories = id_mappings.directories.apply_or_match(updated_directories, self.match_directories)
+        mapped_directories = id_mappings.directories.apply_or_match(updated_directories, other.match_directories)
         # Update the directories
         if not opts.dry_run:
             new_ids = other.update_directories(mapped_directories)
@@ -106,7 +106,7 @@ class Store:
         dest_tracks = [other.absolutize_track(t, opts) if t else None for t in rel_tracks]
         updated_tracks = [t for t in dest_tracks if t]
         # Map the ids (by first looking up already known mappings, then matching)
-        mapped_tracks = id_mappings.tracks.apply_or_match(updated_tracks, lambda ts: self.match_tracks([t.header() for t in ts]))
+        mapped_tracks = id_mappings.tracks.apply_or_match(updated_tracks, lambda ts: other.match_tracks([t.header() for t in ts]))
         # Update the tracks
         if not opts.dry_run:
             new_ids = other.update_tracks(mapped_tracks)
@@ -138,7 +138,7 @@ class Store:
         playlists = list(self.playlists())
         # Map playlist ids and their track ids
         mapped_playlists = []
-        for playlist in id_mappings.playlists.apply_or_match(playlists, lambda ps: self.match_playlists([p.header() for p in ps])):
+        for playlist in id_mappings.playlists.apply_or_match(playlists, lambda ps: other.match_playlists([p.header() for p in ps])):
             mapped_ids = set()
             for track_id in playlist.track_ids:
                 mapped_id = id_mappings.tracks.get(track_id)
@@ -159,7 +159,7 @@ class Store:
         crates = list(self.crates())
         # Map crate ids and their track ids
         mapped_crates = []
-        for crate in id_mappings.crates.apply_or_match(crates, lambda cs: self.match_crates([c.header() for c in cs])):
+        for crate in id_mappings.crates.apply_or_match(crates, lambda cs: other.match_crates([c.header() for c in cs])):
             mapped_ids = set()
             for track_id in crate.track_ids:
                 mapped_id = id_mappings.tracks.get(track_id)
