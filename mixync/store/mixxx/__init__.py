@@ -410,7 +410,7 @@ class MixxxStore(Store):
                     name=playlist.name,
                     # TODO: Merge position
                     # position=playlist.position,
-                    type=playlist.type,
+                    hidden=playlist.type,
                     locked=playlist.locked
                 ))
                 session.flush()
