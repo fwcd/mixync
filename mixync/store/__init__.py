@@ -132,10 +132,10 @@ class Store:
                         suffix = f"' ({len(raw) / 1_000_000} MB)"
                         terminal_width = get_terminal_size((80, 20)).columns
                         available_width = max(5, terminal_width - len(progress.prefix()) - len(prefix) - len(suffix) - 3)
-                        progress.print(prefix + truncate(Path(location).name, available_width) + suffix)
+                        progress.update(prefix + truncate(Path(location).name, available_width) + suffix)
                 except Exception as e:
-                    print(f'Could not copy {track.name}: {e}')
-                    progress.print(f'Skipping track...')
+                    progress.print(f'Could not copy {track.name}: {e}')
+                    progress.update(f'Skipping track...')
         if opts.log:
             info(f'Copied {copied_count} track files ({len(zipped_tracks) - copied_count} skipped)')
 
