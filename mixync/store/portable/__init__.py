@@ -233,8 +233,8 @@ class PortableStore(Store):
                 ))
                 session.flush()
                 new_ids.append(new_crate.id)
+                # TODO: More sophisticated crate merging strategy (should we delete old tracks like with playlists?)
                 for track_id in crate.track_ids:
-                    # TODO: Delete old tracks?
                     session.merge(PortableCrateTrack(
                         crate_id=new_crate.id,
                         track_id=track_id
@@ -256,6 +256,7 @@ class PortableStore(Store):
                 ))
                 session.flush()
                 new_ids.append(new_playlist.id)
+                # TODO: More sophisticated playlist merging strategy than just replacing?
                 session.execute(delete(PortablePlaylistTrack).where(PortablePlaylistTrack.playlist_id == new_playlist.id))
                 for i, track_id in enumerate(playlist.track_ids):
                     session.merge(PortablePlaylistTrack(

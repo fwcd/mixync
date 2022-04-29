@@ -324,7 +324,6 @@ class MixxxStore(Store):
         new_ids = []
         with self.make_session() as session:
             for crate in crates:
-                # TODO: Tracks
                 new_crate = session.merge(MixxxCrate(
                     id=crate.id,
                     name=crate.name,
@@ -333,13 +332,19 @@ class MixxxStore(Store):
                 ))
                 session.flush()
                 new_ids.append(new_crate.id)
+                # TODO: More sophisticated crate merging strategy
+                # (should we delete old tracks like with playlists, even though we don't have to worry about order?)
+                for track_id in crate.track_ids:
+                    session.merge(MixxxCrateTrack(
+                        crate_id=new_crate.id,
+                        track_id=track_id
+                    ))
         return new_ids
 
     def update_playlists(self, playlists: list[Playlist]) -> list[int]:
         new_ids = []
         with self.make_session() as session:
             for playlist in playlists:
-                # TODO: Tracks
                 new_playlist = session.merge(MixxxPlaylist(
                     id=playlist.id,
                     name=playlist.name,
@@ -350,6 +355,14 @@ class MixxxStore(Store):
                 ))
                 session.flush()
                 new_ids.append(new_playlist.id)
+                # TODO: More sophisticated playlist merging strategy than just replacing?
+                session.execute(delete(MixxxPlaylistTrack).where(MixxxPlaylistTrack.playlist_id == new_playlist.id))
+                for i, track_id in enumerate(playlist.track_ids):
+                    session.merge(MixxxPlaylistTrack(
+                        playlist_id=new_playlist.id,
+                        track_id=track_id,
+                        position=i
+                    ))
         return new_ids
     
     def download_track(self, location: str) -> bytes:
