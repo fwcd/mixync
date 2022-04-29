@@ -40,10 +40,10 @@ class IdMapping:
         """Fetches the mapped value or none."""
         return self.mapping.get(id, None)
 
-    def update(self, source: list[T], dest: list[T]):
-        for s, d in zip(source, dest):
-            if s.id and d.id:
-                self.mapping[s.id] = d.id
+    def update(self, values: list[T], new_ids: list[int]):
+        for v, id in zip(values, new_ids):
+            if v.id:
+                self.mapping[v.id] = id
 
 @dataclass
 class IdMappings:
@@ -63,23 +63,22 @@ class Store:
         if opts.log:
             info(f'Copying from a {type(self).__name__} to a {type(other).__name__}')
         
-        id_mappings = IdMappings()
-
         # TODO: Deltas?
         # TODO: Add methods for matching tracks to existing tracks in the DB
         #       at the store level? Perhaps just more fine grained query methods?
 
-        # Copy directory and track metadata
+        # Create empty id mappings
+        id_mappings = IdMappings()
+
+        # Copy metadata and tracks
         # NOTE: It is important that directory metadata is copied first since
         #       the store implementation may e.g. prompt the user in
         #       'absolutize_directory' about the mapping before writing anything.
+        #       Also we want to make sure that tracks are copied before playlists
+        #       and crates, since otherwise the ids wouldn't be mapped.
         self.copy_directories_to(other, id_mappings, opts)
         tracks, dest_tracks = self.copy_tracks_to(other, id_mappings, opts)
-
-        # Copy actual track files
         self.copy_track_files_to(other, tracks, dest_tracks, id_mappings, opts)
-        
-        # Copy playlists and crates
         self.copy_playlists_to(other, id_mappings, opts)
         self.copy_crates_to(other, id_mappings, opts)
 
@@ -93,9 +92,11 @@ class Store:
         # Map the ids (by first looking up already known mappings, then matching)
         mapped_directories = id_mappings.directories.apply_or_match(updated_directories, self.match_directories)
         # Update the directories
-        updated_directory_count = 0 if opts.dry_run else other.update_directories(mapped_directories)
+        if not opts.dry_run:
+            new_ids = other.update_directories(mapped_directories)
+            id_mappings.directories.update(directories, new_ids)
         if opts.log:
-            info(f'Copied {updated_directory_count} directory entries')
+            info(f'Copied {len(mapped_directories)} directory entries')
 
     def copy_tracks_to(self, other: Store, id_mappings: IdMappings, opts: Options) -> tuple[list[Track], list[Optional[Track]]]:
         """Copies track metadata ot the given store."""
@@ -107,9 +108,11 @@ class Store:
         # Map the ids (by first looking up already known mappings, then matching)
         mapped_tracks = id_mappings.tracks.apply_or_match(updated_tracks, lambda ts: self.match_tracks([t.header() for t in ts]))
         # Update the tracks
-        updated_track_count = 0 if opts.dry_run else other.update_tracks(mapped_tracks)
+        if not opts.dry_run:
+            new_ids = other.update_tracks(mapped_tracks)
+            id_mappings.tracks.update(tracks, new_ids)
         if opts.log:
-            info(f'Copied {updated_track_count} track entries')
+            info(f'Copied {len(mapped_tracks)} track entries')
         return tracks, dest_tracks
 
     def copy_track_files_to(self, other: Store, tracks: list[Track], dest_tracks: list[Optional[Track]], id_mappings: IdMappings, opts: Options):
@@ -133,18 +136,24 @@ class Store:
     def copy_playlists_to(self, other: Store, id_mappings: IdMappings, opts: Options):
         """Copies playlists to the given store."""
         playlists = list(self.playlists())
+        # TODO: Map track ids
         mapped_playlists = id_mappings.playlists.apply_or_match(playlists, lambda ps: self.match_playlists([p.header() for p in ps]))
-        updated_playlist_count = 0 if opts.dry_run else other.update_playlists(mapped_playlists)
+        if not opts.dry_run:
+            new_ids = other.update_playlists(mapped_playlists)
+            id_mappings.playlists.update(playlists, new_ids)
         if opts.log:
-            info(f'Copied {updated_playlist_count} playlists')
+            info(f'Copied {len(mapped_playlists)} playlists')
     
     def copy_crates_to(self, other: Store, id_mappings: IdMappings, opts: Options):
         """Copies crates to the given store."""
         crates = list(self.crates())
+        # TODO: Map track ids
         mapped_crates = id_mappings.crates.apply_or_match(crates, lambda cs: self.match_crates([c.header() for c in cs]))
-        updated_crate_count = 0 if opts.dry_run else other.update_crates(mapped_crates)
+        if not opts.dry_run:
+            new_ids = other.update_crates(mapped_crates)
+            id_mappings.crates.update(crates, new_ids)
         if opts.log:
-            info(f'Copied {updated_crate_count} crates')
+            info(f'Copied {len(mapped_crates)} crates')
 
     @classmethod
     def parse_ref(cls, ref: str):
@@ -188,19 +197,19 @@ class Store:
     
     # Update methods
     
-    def update_tracks(self, tracks: list[Track]) -> int:
+    def update_tracks(self, tracks: list[Track]) -> list[int]:
         """Merges the given tracks (metadata only) into the store."""
         raise NotImplementedError(f'update_tracks is not implemented for {type(self).__name__}!')
 
-    def update_crates(self, crates: list[Crate]) -> int:
+    def update_crates(self, crates: list[Crate]) -> list[int]:
         """Merges the given crates into this store."""
         raise NotImplementedError(f'update_crates is not implemented for {type(self).__name__}!')
 
-    def update_playlists(self, playlists: list[Playlist]) -> int:
+    def update_playlists(self, playlists: list[Playlist]) -> list[int]:
         """Merges the given playlists into this store."""
         raise NotImplementedError(f'update_playlists is not implemented for {type(self).__name__}!')
 
-    def update_directories(self, directories: list[Directory]) -> int:
+    def update_directories(self, directories: list[Directory]) -> list[int]:
         """Merges the given directories into this store."""
         raise NotImplementedError(f'update_directories is not implemented for {type(self).__name__}!')
 

@@ -32,11 +32,6 @@ class PortableStore(Store):
 
         self._create_tables()
 
-        self.track_id_mappings = {}
-        self.directory_id_mappings = {}
-        self.crate_id_mappings = {}
-        self.playlist_id_mappings = {}
-
     @staticmethod
     def parse_ref(ref: str):
         try:
@@ -129,12 +124,12 @@ class PortableStore(Store):
         row = session.query(cls).where(*constraints).first()
         return row.id if row else None
 
-    def update_tracks(self, tracks: list[Track]) -> int:
-        count = 0
+    def update_tracks(self, tracks: list[Track]) -> list[int]:
+        new_ids = []
         with self.make_session.begin() as session:
             for track in tracks:
                 new_track = session.merge(PortableTrack(
-                    id=self.track_id_mappings.get(track.id, None) or self._query_id(session, PortableTrack, PortableTrack.name == track.name, PortableTrack.artist == track.artist),
+                    id=track.id,
                     name=track.name,
                     artist=track.artist,
                     location=track.location,
@@ -160,11 +155,10 @@ class PortableStore(Store):
                     color=track.color
                 ))
                 session.flush()
-                id = new_track.id
-                self.track_id_mappings[track.id] = id
+                new_ids.append(new_track.id)
                 # TODO: More sophisticated cue merging strategy?
                 if track.cues:
-                    session.execute(delete(PortableCue).where(PortableCue.track_id == id))
+                    session.execute(delete(PortableCue).where(PortableCue.track_id == new_track.id))
                 for cue in track.cues:
                     session.merge(PortableCue(
                         type=cue.type,
@@ -173,57 +167,49 @@ class PortableStore(Store):
                         hotcue=cue.hotcue,
                         label=cue.label,
                         color=cue.color,
-                        track_id=id
+                        track_id=new_track.id
                     ))
-                count += 1
-        return count
+        return new_ids
 
-    def update_directories(self, directories: list[Directory]) -> int:
-        count = 0
+    def update_directories(self, directories: list[Directory]) -> list[int]:
+        new_ids = []
         with self.make_session.begin() as session:
             for directory in directories:
                 new_directory = session.merge(PortableDirectory(
-                    id=self.directory_id_mappings.get(directory.location, None) or self._query_id(session, PortableDirectory, PortableDirectory.location == directory.location),
+                    id=directory.id,
                     location=directory.location
                 ))
                 session.flush()
-                self.directory_id_mappings[directory.location] = new_directory.id
-                count += 1
-        return count
+                new_ids.append(new_directory.id)
+        return new_ids
 
-    def update_crates(self, crates: list[Crate]) -> int:
-        count = 0
+    def update_crates(self, crates: list[Crate]) -> list[int]:
+        new_ids = []
         with self.make_session.begin() as session:
             for crate in crates:
                 new_crate = session.merge(PortableCrate(
-                    id=self.crate_id_mappings.get(crate.id, None) or self._query_id(session, PortableCrate, PortableCrate.name == crate.name),
+                    id=crate.id,
                     name=crate.name,
                     date_created=crate.date_created,
                     date_modified=crate.date_modified,
                     locked=crate.locked
                 ))
                 session.flush()
-                id = new_crate.id
-                self.crate_id_mappings[crate.id] = id
+                new_ids.append(new_crate.id)
                 for track_id in crate.track_ids:
                     # TODO: Delete old tracks?
-                    id = self.track_id_mappings.get(track_id, None)
-                    if id:
-                        session.merge(PortableCrateTrack(
-                            crate_id=new_crate.id,
-                            track_id=id
-                        ))
-                    else:
-                        print(f"Warning: Skipping unmapped track id {track_id} in crate '{crate.name}'")
-                count += 1
-        return count
+                    session.merge(PortableCrateTrack(
+                        crate_id=new_crate.id,
+                        track_id=track_id
+                    ))
+        return new_ids
 
-    def update_playlists(self, playlists: list[Playlist]) -> int:
-        count = 0
+    def update_playlists(self, playlists: list[Playlist]) -> list[int]:
+        new_ids = []
         with self.make_session.begin() as session:
             for playlist in playlists:
                 new_playlist = session.merge(PortablePlaylist(
-                    id=self.playlist_id_mappings.get(playlist.id, None) or self._query_id(session, PortablePlaylist, PortablePlaylist.name == playlist.name),
+                    id=playlist.id,
                     name=playlist.name,
                     position=playlist.position,
                     date_created=playlist.date_created,
@@ -232,21 +218,15 @@ class PortableStore(Store):
                     locked=playlist.locked
                 ))
                 session.flush()
-                id = new_playlist.id
-                self.playlist_id_mappings[playlist.id] = id
-                session.execute(delete(PortablePlaylistTrack).where(PortablePlaylistTrack.playlist_id == id))
+                new_ids.append(new_playlist.id)
+                session.execute(delete(PortablePlaylistTrack).where(PortablePlaylistTrack.playlist_id == new_playlist.id))
                 for i, track_id in enumerate(playlist.track_ids):
-                    id = self.track_id_mappings.get(track_id, None)
-                    if id:
-                        session.merge(PortablePlaylistTrack(
-                            playlist_id=new_playlist.id,
-                            track_id=id,
-                            position=i
-                        ))
-                    else:
-                        print(f"Warning: Skipping unmapped track id {track_id} in playlist '{playlist.name}'")
-                count += 1
-        return count
+                    session.merge(PortablePlaylistTrack(
+                        playlist_id=new_playlist.id,
+                        track_id=track_id,
+                        position=i
+                    ))
+        return new_ids
 
     def download_track(self, location: str) -> bytes:
         path = self.audio_path / location
