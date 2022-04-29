@@ -20,7 +20,7 @@ class Playlist:
     date_modified: datetime = field(default_factory=datetime.now)
     type: PlaylistType = PlaylistType.DEFAULT
     locked: bool = False
-    track_ids: list[str] = field(default_factory=lambda: [])
+    track_ids: list[int] = field(default_factory=lambda: [])
 
     def header(self) -> PlaylistHeader:
         return PlaylistHeader(

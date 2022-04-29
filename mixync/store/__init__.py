@@ -136,8 +136,18 @@ class Store:
     def copy_playlists_to(self, other: Store, id_mappings: IdMappings, opts: Options):
         """Copies playlists to the given store."""
         playlists = list(self.playlists())
-        # TODO: Map track ids
-        mapped_playlists = id_mappings.playlists.apply_or_match(playlists, lambda ps: self.match_playlists([p.header() for p in ps]))
+        # Map playlist ids and their track ids
+        mapped_playlists = []
+        for playlist in id_mappings.playlists.apply_or_match(playlists, lambda ps: self.match_playlists([p.header() for p in ps])):
+            mapped_ids = set()
+            for track_id in playlist.track_ids:
+                mapped_id = id_mappings.tracks.get(track_id)
+                if mapped_id:
+                    mapped_ids.add(mapped_id)
+                else:
+                    print(f"Warning: Track id {track_id} from playlist '{playlist.name}' could not be mapped.")
+            mapped_playlists.append(replace(playlist, track_ids=mapped_ids))
+        # Update the playlists
         if not opts.dry_run:
             new_ids = other.update_playlists(mapped_playlists)
             id_mappings.playlists.update(playlists, new_ids)
@@ -147,8 +157,18 @@ class Store:
     def copy_crates_to(self, other: Store, id_mappings: IdMappings, opts: Options):
         """Copies crates to the given store."""
         crates = list(self.crates())
-        # TODO: Map track ids
-        mapped_crates = id_mappings.crates.apply_or_match(crates, lambda cs: self.match_crates([c.header() for c in cs]))
+        # Map crate ids and their track ids
+        mapped_crates = []
+        for crate in id_mappings.crates.apply_or_match(crates, lambda cs: self.match_crates([c.header() for c in cs])):
+            mapped_ids = set()
+            for track_id in crate.track_ids:
+                mapped_id = id_mappings.tracks.get(track_id)
+                if mapped_id:
+                    mapped_ids.add(mapped_id)
+                else:
+                    print(f"Warning: Track id {track_id} from crate '{crate.name}' could not be mapped.")
+            mapped_crates.append(replace(crate, track_ids=mapped_ids))
+        # Update the crates
         if not opts.dry_run:
             new_ids = other.update_crates(mapped_crates)
             id_mappings.crates.update(crates, new_ids)
