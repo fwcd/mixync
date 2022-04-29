@@ -1,15 +1,8 @@
-from __future__ import annotations
-from typing import Optional, Iterable
-
 from mixync.model.crate import Crate
-from mixync.model.cue import Cue
 from mixync.model.directory import Directory
 from mixync.model.playlist import Playlist
 from mixync.model.track import Track
-from mixync.options import Options
 from mixync.store import Store
-from mixync.utils.progress import ProgressLine
-from mixync.utils.str import truncate
 
 class DebugStore(Store):
     """A simple store that outputs updates to stdout for debugging."""
@@ -25,25 +18,25 @@ class DebugStore(Store):
             return DebugStore(compact=True)
         return None
     
-    def update_tracks(self, tracks: list[Track]) -> int:
+    def update_tracks(self, tracks: list[Track]) -> list[int]:
         for track in tracks:
             print(track.name if self.compact else track)
-        return len(tracks)
+        return list(range(len(tracks)))
 
-    def update_crates(self, crates: list[Crate]) -> int:
+    def update_crates(self, crates: list[Crate]) -> list[int]:
         for crate in crates:
             print(crate.name if self.compact else crate)
-        return len(crates)
+        return list(range(len(crates)))
 
-    def update_playlists(self, playlists: list[Playlist]) -> int:
+    def update_playlists(self, playlists: list[Playlist]) -> list[int]:
         for playlist in playlists:
             print(playlist.name if self.compact else playlist)
-        return len(playlists)
+        return list(range(len(playlists)))
 
-    def update_directories(self, directories: list[Directory]) -> int:
+    def update_directories(self, directories: list[Directory]) -> list[int]:
         for directory in directories:
             print(directory.location if self.compact else directory)
-        return len(directories)
+        return list(range(len(directories)))
 
     # Upload/download methods
 
