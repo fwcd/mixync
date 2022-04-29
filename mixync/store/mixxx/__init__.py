@@ -354,7 +354,7 @@ class MixxxStore(Store):
         with self.make_session() as session:
             for directory in directories:
                 session.merge(MixxxDirectory(
-                    location=directory.location
+                    directory=directory.location
                 ))
                 session.flush()
                 new_ids.append(self._directory_id(directory.location))
