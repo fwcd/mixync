@@ -155,11 +155,14 @@ class MixxxStore(Store):
     
     # TODO: absolutize_track
     
+    def _directory_id(self, location: str) -> int:
+        return int(sha1(location.encode('utf8')).hexdigest(), 16)
+
     def directories(self) -> Iterable[Directory]:
         with self.make_session() as session:
             for directory in session.query(MixxxDirectory):
                 yield Directory(
-                    id=int(sha1(directory.directory.encode('utf8')).hexdigest(), 16),
+                    id=self._directory_id(directory.directory),
                     location=directory.directory
                 )
     
@@ -248,20 +251,76 @@ class MixxxStore(Store):
                 )
     
     def update_tracks(self, tracks: list[Track]) -> list[int]:
-        # TODO
-        return super().update_tracks(tracks)
+        new_ids = []
+        with self.make_session.begin() as session:
+            for track in tracks:
+                # TODO: Location, cues
+                new_track = session.merge(MixxxTrack(
+                    id=track.id,
+                    name=track.name,
+                    artist=track.artist,
+                    album=track.album,
+                    year=track.year,
+                    genre=track.genre,
+                    comment=track.comment,
+                    url=track.url,
+                    duration=float(track.duration_ms) / 1000.0 if track.duration_ms else None,
+                    samplerate=track.sample_rate,
+                    bpm=track.bpm,
+                    beats=track.beats.data if track.beats else None,
+                    beats_version=track.beats.version if track.beats else None,
+                    beats_sub_version=track.beats.sub_version if track.beats else None,
+                    key=track.key,
+                    keys=track.keys.data if track.keys else None,
+                    keys_version=track.keys.version if track.keys else None,
+                    keys_sub_version=track.keys.sub_version if track.keys else None,
+                    channels=track.channels,
+                    timesplayed=track.times_played,
+                    rating=track.rating,
+                    color=track.color
+                ))
+                new_ids.append(new_track.id)
+        return new_ids
 
     def update_directories(self, directories: list[Directory]) -> list[int]:
-        # TODO
-        return super().update_directories(directories)
+        new_ids = []
+        with self.make_session() as session:
+            for directory in directories:
+                session.merge(MixxxDirectory(
+                    location=directory.location
+                ))
+                new_ids.append(self._directory_id(directory.location))
+        return new_ids
 
     def update_crates(self, crates: list[Crate]) -> list[int]:
-        # TODO
-        return super().update_crates(crates)
+        new_ids = []
+        with self.make_session() as session:
+            for crate in crates:
+                # TODO: Tracks
+                new_crate = session.merge(MixxxCrate(
+                    id=crate.id,
+                    name=crate.name,
+                    count=len(crate.track_ids),
+                    locked=crate.locked
+                ))
+                new_ids.append(new_crate.id)
+        return new_ids
 
     def update_playlists(self, playlists: list[Playlist]) -> list[int]:
-        # TODO
-        return super().update_playlists(playlists)
+        new_ids = []
+        with self.make_session() as session:
+            for playlist in playlists:
+                # TODO: Tracks
+                new_playlist = session.merge(MixxxPlaylist(
+                    id=playlist.id,
+                    name=playlist.name,
+                    # TODO: Merge position
+                    # position=playlist.position,
+                    type=playlist.type,
+                    locked=playlist.locked
+                ))
+                new_ids.append(new_playlist.id)
+        return new_ids
     
     def download_track(self, location: str) -> bytes:
         with open(location, 'rb') as f:
