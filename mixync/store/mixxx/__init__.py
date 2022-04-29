@@ -1,17 +1,18 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, make_transient
+from sqlalchemy import create_engine, delete
+from sqlalchemy.orm import sessionmaker
+from hashlib import sha1
 from pathlib import Path
-from typing import Iterable, Optional, Type, TypeVar
+from typing import Iterable, Optional, TypeVar
 
 import sys
-from mixync.model.beats import Beats
 
-from mixync.model.crate import Crate
+from mixync.model.beats import Beats
+from mixync.model.crate import Crate, CrateHeader
 from mixync.model.cue import Cue
 from mixync.model.directory import Directory
 from mixync.model.keys import Keys
-from mixync.model.playlist import Playlist
-from mixync.model.track import Track
+from mixync.model.playlist import Playlist, PlaylistHeader
+from mixync.model.track import Track, TrackHeader
 from mixync.store import Store
 from mixync.store.mixxx.model.crate import *
 from mixync.store.mixxx.model.crate_track import *
@@ -152,12 +153,28 @@ class MixxxStore(Store):
         new_directory.location = str(matching_location)
         return new_directory
     
-    # TODO: absolutize_track
+    def absolutize_track(self, track: Track, opts: Options) -> Optional[Track]:
+        new_track = super().absolutize_track(track, opts)
+        if not new_track:
+            return None
+        location = Path(track.location)
+        if not location.parts:
+            raise ValueError('Cannot absolutize a track with an empty location path.')
+        matching_directory = self._find_matching_directory(location.parts[0], opts).resolve()
+        matching_location = matching_directory.parent / location
+        if opts.log and opts.verbose:
+            print(f"Mapping '{track.location}' to '{matching_location}'")
+        new_track.location = str(matching_location)
+        return new_track
     
+    def _directory_id(self, location: str) -> int:
+        return int(sha1(location.encode('utf8')).hexdigest(), 16)
+
     def directories(self) -> Iterable[Directory]:
         with self.make_session() as session:
             for directory in session.query(MixxxDirectory):
                 yield Directory(
+                    id=self._directory_id(directory.directory),
                     location=directory.directory
                 )
     
@@ -170,7 +187,7 @@ class MixxxStore(Store):
                 MixxxTrack.artist == artist if artist else None,
             ] if c]
             for track in session.query(MixxxTrack).where(*constraints):
-                def sample_to_ms(s) -> int:
+                def sample_to_ms(s: int) -> int:
                     return int(s * 1000 / (track.channels * track.samplerate))
 
                 location = session.query(MixxxTrackLocation).where(MixxxTrackLocation.id == track.location).first()
@@ -244,13 +261,173 @@ class MixxxStore(Store):
                     locked=bool(playlist.locked),
                     track_ids=[t.id for t in session.query(MixxxPlaylistTrack).where(MixxxPlaylistTrack.playlist_id == playlist.id)]
                 )
-    
-    # TODO: Update methods and upload
 
+    def _query_id(self, session, cls, *constraints) -> Optional[int]:
+        row = session.query(cls).where(*constraints).first()
+        return row.id if row else None
+    
+    def match_tracks(self, tracks: list[TrackHeader]) -> Iterable[Optional[int]]:
+        with self.make_session() as session:
+            for track in tracks:
+                yield self._query_id(
+                    session,
+                    MixxxTrack,
+                    MixxxTrack.title == track.name,
+                    MixxxTrack.artist == track.artist
+                )
+    
+    def match_directories(self, directories: list[Directory]) -> Iterable[Optional[int]]:
+        with self.make_session() as session:
+            for directory in directories:
+                row = session.query(MixxxDirectory).where(MixxxDirectory.directory == directory.location).first()
+                yield self._directory_id(row.directory) if row else None
+    
+    def match_playlists(self, playlists: list[PlaylistHeader]) -> Iterable[Optional[int]]:
+        with self.make_session() as session:
+            for playlist in playlists:
+                yield self._query_id(
+                    session,
+                    MixxxPlaylist,
+                    MixxxPlaylist.name == playlist.name
+                )
+    
+    def match_crates(self, crates: list[CrateHeader]) -> Iterable[Optional[int]]:
+        with self.make_session() as session:
+            for crate in crates:
+                yield self._query_id(
+                    session,
+                    MixxxCrate,
+                    MixxxCrate.name == crate.name
+                )
+    
+    def update_tracks(self, tracks: list[Track]) -> list[int]:
+        new_ids = []
+        with self.make_session.begin() as session:
+            for track in tracks:
+                path = Path(track.location).resolve()
+                location = session.query(MixxxTrackLocation).where(MixxxTrackLocation.location == track.location).first()
+                if not location:
+                    location = session.merge(MixxxTrackLocation(
+                        location=track.location,
+                        filename=path.name,
+                        directory=str(path.parent),
+                        # TODO: Determine filesize?
+                        filesize=None,
+                        fs_deleted=0,
+                        needs_verification=0
+                    ))
+                    session.flush()
+                # TODO: Insert main cue point as 'cuepoint' (in addition to the cues below)?
+                new_track = session.merge(MixxxTrack(
+                    id=track.id,
+                    title=track.name,
+                    artist=track.artist,
+                    album=track.album,
+                    year=track.year,
+                    genre=track.genre,
+                    location=location.id,
+                    comment=track.comment,
+                    url=track.url,
+                    duration=float(track.duration_ms) / 1000.0 if track.duration_ms else None,
+                    samplerate=track.sample_rate,
+                    bpm=track.bpm,
+                    beats=track.beats.data if track.beats else None,
+                    beats_version=track.beats.version if track.beats else None,
+                    beats_sub_version=track.beats.sub_version if track.beats else None,
+                    key=track.key,
+                    keys=track.keys.data if track.keys else None,
+                    keys_version=track.keys.version if track.keys else None,
+                    keys_sub_version=track.keys.sub_version if track.keys else None,
+                    channels=track.channels,
+                    timesplayed=track.times_played,
+                    rating=track.rating,
+                    color=track.color,
+                    mixxx_deleted=0
+                ))
+                session.flush()
+                new_ids.append(new_track.id)
+                # TODO: More sophisticated cue merging strategy?
+                if track.cues:
+                    def ms_to_sample(m: int) -> Optional[int]:
+                        if track.channels and track.sample_rate:
+                            return int((m * track.channels * track.sample_rate) / 1000)
+                        else:
+                            return None
+
+                    session.execute(delete(MixxxCue).where(MixxxCue.track_id == new_track.id))
+                    for cue in track.cues:
+                        session.merge(MixxxCue(
+                            type=cue.type,
+                            position=ms_to_sample(cue.position_ms) if cue.position_ms else None,
+                            length=ms_to_sample(cue.length_ms),
+                            hotcue=cue.hotcue,
+                            label=cue.label,
+                            color=cue.color,
+                            track_id=new_track.id
+                        ))
+        return new_ids
+
+    def update_directories(self, directories: list[Directory]) -> list[int]:
+        new_ids = []
+        with self.make_session.begin() as session:
+            for directory in directories:
+                session.merge(MixxxDirectory(
+                    directory=directory.location
+                ))
+                session.flush()
+                new_ids.append(self._directory_id(directory.location))
+        return new_ids
+
+    def update_crates(self, crates: list[Crate]) -> list[int]:
+        new_ids = []
+        with self.make_session.begin() as session:
+            for crate in crates:
+                new_crate = session.merge(MixxxCrate(
+                    id=crate.id,
+                    name=crate.name,
+                    count=len(crate.track_ids),
+                    locked=crate.locked
+                ))
+                session.flush()
+                new_ids.append(new_crate.id)
+                # TODO: More sophisticated crate merging strategy
+                # (should we delete old tracks like with playlists, even though we don't have to worry about order?)
+                for track_id in crate.track_ids:
+                    session.merge(MixxxCrateTrack(
+                        crate_id=new_crate.id,
+                        track_id=track_id
+                    ))
+        return new_ids
+
+    def update_playlists(self, playlists: list[Playlist]) -> list[int]:
+        new_ids = []
+        with self.make_session.begin() as session:
+            for playlist in playlists:
+                new_playlist = session.merge(MixxxPlaylist(
+                    id=playlist.id,
+                    name=playlist.name,
+                    # TODO: Merge position
+                    # position=playlist.position,
+                    hidden=playlist.type,
+                    locked=playlist.locked
+                ))
+                session.flush()
+                new_ids.append(new_playlist.id)
+                # TODO: More sophisticated playlist merging strategy than just replacing?
+                session.execute(delete(MixxxPlaylistTrack).where(MixxxPlaylistTrack.playlist_id == new_playlist.id))
+                for i, track_id in enumerate(playlist.track_ids):
+                    session.merge(MixxxPlaylistTrack(
+                        playlist_id=new_playlist.id,
+                        track_id=track_id,
+                        position=i
+                    ))
+        return new_ids
+    
     def download_track(self, location: str) -> bytes:
         with open(location, 'rb') as f:
             return f.read()
         
     def upload_track(self, location: str, raw: bytes):
+        Path(location).parent.mkdir(parents=True, exist_ok=True)
         with open(location, 'wb') as f:
             f.write(raw)

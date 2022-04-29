@@ -30,6 +30,7 @@ def main():
     parser.add_argument('dest', help='The destination ref (to be copied to)')
     parser.add_argument('-d', '--dest-root-dir', type=str, help='A root folder to place copied music directories in. Only used by some destination stores.')
     parser.add_argument('-y', '--assume-yes', action='store_true', help='Whether to disable interactive prompts.')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Whether to log verbosely.')
     parser.add_argument('--dry-run', action='store_true', help='Whether to skip all actual file changes.')
 
     args = parser.parse_args()
@@ -42,6 +43,7 @@ def main():
     dest = parse_ref(args.dest)
     opts = Options(
         log=True,
+        verbose=args.verbose,
         dry_run=args.dry_run,
         assume_yes=args.assume_yes,
         dest_root_dir=Path(args.dest_root_dir) if args.dest_root_dir else None

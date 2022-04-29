@@ -8,6 +8,7 @@ class ProgressLine:
         self.i = 0
         self.total = total
         self.last_msg = ''
+        self.msg = ''
         self.with_bar = with_bar
         self.bar_length = bar_length
         self.final_newline = final_newline
@@ -25,12 +26,19 @@ class ProgressLine:
         bar = f"[{'█' * steps + '░' * (self.bar_length - steps)}]" if self.with_bar else ''
         return f'{bar} [{self.i + 1}/{self.total}]'
 
-    def print(self, msg: str):
-        output = ' '.join(s for s in [
+    def current(self):
+        return ' '.join(s for s in [
             self.prefix(),
-            msg,
-            ' ' * (len(self.last_msg) - len(msg)),
+            self.msg,
+            ' ' * (len(self.last_msg) - len(self.msg)),
         ] if s)
-        print(f'\r{output}', end='', flush=True)
-        self.last_msg = msg
+
+    def update(self, msg: str):
+        self.last_msg = self.msg
+        self.msg = msg
         self.i += 1
+        print(f'\r{self.current()}', end='', flush=True)
+    
+    def print(self, msg: str):
+        print(f"\r{msg}{' ' * (len(self.last_msg) - len(msg))}\n{self.current()}", end='', flush=True)
+        self.last_msg = msg
