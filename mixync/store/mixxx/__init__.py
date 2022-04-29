@@ -341,7 +341,8 @@ class MixxxStore(Store):
                     channels=track.channels,
                     timesplayed=track.times_played,
                     rating=track.rating,
-                    color=track.color
+                    color=track.color,
+                    mixxx_deleted=0
                 ))
                 session.flush()
                 new_ids.append(new_track.id)
