@@ -295,58 +295,62 @@ class MixxxStore(Store):
         new_ids = []
         with self.make_session.begin() as session:
             for track in tracks:
-                location = session.query(MixxxTrackLocation).where(MixxxTrackLocation.location == track.location).first()
-                if not location:
-                    path = Path(track.location).resolve()
-                    location = session.add(MixxxTrackLocation(
-                        location=track.location,
-                        filename=path.name,
-                        directory=str(path.parent),
-                        filesize=path.stat().st_size,
-                        fs_deleted=0,
-                        needs_verification=0
-                    ))
-                # TODO: Insert main cue point as 'cuepoint' (in addition to the cues below)?
-                new_track = session.merge(MixxxTrack(
-                    id=track.id,
-                    title=track.name,
-                    artist=track.artist,
-                    album=track.album,
-                    year=track.year,
-                    genre=track.genre,
-                    location=location.id,
-                    comment=track.comment,
-                    url=track.url,
-                    duration=float(track.duration_ms) / 1000.0 if track.duration_ms else None,
-                    samplerate=track.sample_rate,
-                    bpm=track.bpm,
-                    beats=track.beats.data if track.beats else None,
-                    beats_version=track.beats.version if track.beats else None,
-                    beats_sub_version=track.beats.sub_version if track.beats else None,
-                    key=track.key,
-                    keys=track.keys.data if track.keys else None,
-                    keys_version=track.keys.version if track.keys else None,
-                    keys_sub_version=track.keys.sub_version if track.keys else None,
-                    channels=track.channels,
-                    timesplayed=track.times_played,
-                    rating=track.rating,
-                    color=track.color
-                ))
-                session.flush()
-                new_ids.append(new_track.id)
-                # TODO: More sophisticated cue merging strategy?
-                if track.cues:
-                    session.execute(delete(MixxxCue).where(MixxxCue.track_id == new_track.id))
-                    for cue in track.cues:
-                        session.merge(MixxxCue(
-                            type=cue.type,
-                            position_ms=cue.position_ms,
-                            length_ms=cue.length_ms,
-                            hotcue=cue.hotcue,
-                            label=cue.label,
-                            color=cue.color,
-                            track_id=new_track.id
+                path = Path(track.location).resolve()
+                if path.exists():
+                    location = session.query(MixxxTrackLocation).where(MixxxTrackLocation.location == track.location).first()
+                    if not location:
+                        location = session.add(MixxxTrackLocation(
+                            location=track.location,
+                            filename=path.name,
+                            directory=str(path.parent),
+                            filesize=path.stat().st_size,
+                            fs_deleted=0,
+                            needs_verification=0
                         ))
+                    # TODO: Insert main cue point as 'cuepoint' (in addition to the cues below)?
+                    new_track = session.merge(MixxxTrack(
+                        id=track.id,
+                        title=track.name,
+                        artist=track.artist,
+                        album=track.album,
+                        year=track.year,
+                        genre=track.genre,
+                        location=location.id,
+                        comment=track.comment,
+                        url=track.url,
+                        duration=float(track.duration_ms) / 1000.0 if track.duration_ms else None,
+                        samplerate=track.sample_rate,
+                        bpm=track.bpm,
+                        beats=track.beats.data if track.beats else None,
+                        beats_version=track.beats.version if track.beats else None,
+                        beats_sub_version=track.beats.sub_version if track.beats else None,
+                        key=track.key,
+                        keys=track.keys.data if track.keys else None,
+                        keys_version=track.keys.version if track.keys else None,
+                        keys_sub_version=track.keys.sub_version if track.keys else None,
+                        channels=track.channels,
+                        timesplayed=track.times_played,
+                        rating=track.rating,
+                        color=track.color
+                    ))
+                    session.flush()
+                    new_ids.append(new_track.id)
+                    # TODO: More sophisticated cue merging strategy?
+                    if track.cues:
+                        session.execute(delete(MixxxCue).where(MixxxCue.track_id == new_track.id))
+                        for cue in track.cues:
+                            session.merge(MixxxCue(
+                                type=cue.type,
+                                position_ms=cue.position_ms,
+                                length_ms=cue.length_ms,
+                                hotcue=cue.hotcue,
+                                label=cue.label,
+                                color=cue.color,
+                                track_id=new_track.id
+                            ))
+                else:
+                    print(f"Warning: Track '{track.name}' does not exist at {track.location}, skipping")
+                    new_ids.append(None)
         return new_ids
 
     def update_directories(self, directories: list[Directory]) -> list[int]:
