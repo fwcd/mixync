@@ -368,7 +368,7 @@ class MixxxStore(Store):
 
     def update_directories(self, directories: list[Directory]) -> list[int]:
         new_ids = []
-        with self.make_session() as session:
+        with self.make_session.begin() as session:
             for directory in directories:
                 session.merge(MixxxDirectory(
                     directory=directory.location
@@ -379,7 +379,7 @@ class MixxxStore(Store):
 
     def update_crates(self, crates: list[Crate]) -> list[int]:
         new_ids = []
-        with self.make_session() as session:
+        with self.make_session.begin() as session:
             for crate in crates:
                 new_crate = session.merge(MixxxCrate(
                     id=crate.id,
@@ -400,7 +400,7 @@ class MixxxStore(Store):
 
     def update_playlists(self, playlists: list[Playlist]) -> list[int]:
         new_ids = []
-        with self.make_session() as session:
+        with self.make_session.begin() as session:
             for playlist in playlists:
                 new_playlist = session.merge(MixxxPlaylist(
                     id=playlist.id,
