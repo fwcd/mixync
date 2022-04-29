@@ -7,14 +7,13 @@ from typing import Iterable, Optional, TypeVar
 import sys
 
 from mixync.model.beats import Beats
-from mixync.model.crate import Crate
+from mixync.model.crate import Crate, CrateHeader
 from mixync.model.cue import Cue
 from mixync.model.directory import Directory
 from mixync.model.keys import Keys
-from mixync.model.playlist import Playlist
-from mixync.model.track import Track
+from mixync.model.playlist import Playlist, PlaylistHeader
+from mixync.model.track import Track, TrackHeader
 from mixync.store import Store
-from mixync.store.mixxx.model import directory
 from mixync.store.mixxx.model.crate import *
 from mixync.store.mixxx.model.crate_track import *
 from mixync.store.mixxx.model.cue import *
@@ -249,6 +248,47 @@ class MixxxStore(Store):
                     type=playlist.hidden,
                     locked=bool(playlist.locked),
                     track_ids=[t.id for t in session.query(MixxxPlaylistTrack).where(MixxxPlaylistTrack.playlist_id == playlist.id)]
+                )
+
+    def _query_id(self, session, cls, *constraints) -> Optional[int]:
+        row = session.query(cls).where(*constraints).first()
+        return row.id if row else None
+    
+    def match_tracks(self, tracks: list[TrackHeader]) -> Iterable[Optional[int]]:
+        with self.make_session() as session:
+            for track in tracks:
+                yield self._query_id(
+                    session,
+                    MixxxTrack,
+                    MixxxTrack.title == track.name,
+                    MixxxTrack.artist == track.artist
+                )
+    
+    def match_directories(self, directories: list[Directory]) -> Iterable[Optional[int]]:
+        with self.make_session() as session:
+            for directory in directories:
+                yield self._query_id(
+                    session,
+                    MixxxDirectory,
+                    MixxxDirectory.location == directory.location
+                )
+    
+    def match_playlists(self, playlists: list[PlaylistHeader]) -> Iterable[Optional[int]]:
+        with self.make_session() as session:
+            for playlist in playlists:
+                yield self._query_id(
+                    session,
+                    MixxxPlaylist,
+                    MixxxPlaylist.name == playlist.name
+                )
+    
+    def match_crates(self, crates: list[CrateHeader]) -> Iterable[Optional[int]]:
+        with self.make_session() as session:
+            for crate in crates:
+                yield self._query_id(
+                    session,
+                    MixxxCrate,
+                    MixxxCrate.name == crate.name
                 )
     
     def update_tracks(self, tracks: list[Track]) -> list[int]:
