@@ -14,9 +14,9 @@ from mixync.utils.cli import info
 from mixync.utils.progress import ProgressLine
 from mixync.utils.str import truncate
 from mixync.utils.list import with_compact, zip_or
-from mixync.utils.typing import HasId
+from mixync.utils.typing import Identifiable
 
-T = TypeVar('T', bound='HasId')
+T = TypeVar('T', bound='Identifiable')
 
 @dataclass
 class IdMapping:

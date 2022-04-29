@@ -5,9 +5,9 @@ from mixync.model.directory import Directory
 from mixync.model.playlist import Playlist
 from mixync.model.track import Track
 from mixync.store import Store
-from mixync.utils.typing import HasId
+from mixync.utils.typing import Identifiable
 
-T = TypeVar('T', bound='HasId')
+T = TypeVar('T', bound='Identifiable')
 
 class DebugStore(Store):
     """A simple store that outputs updates to stdout for debugging."""

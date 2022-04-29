@@ -1,4 +1,4 @@
 from typing import Protocol, Optional
 
-class HasId(Protocol):
+class Identifiable(Protocol):
     id: Optional[int]
