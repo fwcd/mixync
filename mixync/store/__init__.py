@@ -28,7 +28,7 @@ class IdMapping:
         """Turns the values without a mapped id into None."""
         return [None if v.id in self.mapping else v for v in values]
     
-    def apply_or_match(self, values: list[T], matcher: Callable[[list[T]], list[Optional[int]]]) -> list[T]:
+    def apply_or_match(self, values: list[T], matcher: Callable[[list[T]], Iterable[Optional[int]]]) -> list[T]:
         """Maps the values with a mapped id directly and uses the matcher function for all others."""
         known_ids = [self.get(d.id) if d.id else None for d in values]
         unmapped_values = self.filter_unmapped(values)
@@ -181,20 +181,20 @@ class Store:
     
     # Match methods
 
-    def match_tracks(self, tracks: list[TrackHeader]) -> list[Optional[int]]:
-        """Fetches a list of track ids that match."""
+    def match_tracks(self, tracks: list[TrackHeader]) -> Iterable[Optional[int]]:
+        """Fetches track ids that match the name/artist or similar."""
         return [None for _ in tracks]
 
-    def match_crates(self, crates: list[CrateHeader]) -> list[Optional[int]]:
-        """Fetches a list of crate ids that match."""
+    def match_crates(self, crates: list[CrateHeader]) -> Iterable[Optional[int]]:
+        """Fetches crate ids that match the name or similar."""
         return [None for _ in crates]
     
-    def match_playlists(self, playlists: list[PlaylistHeader]) -> list[Optional[int]]:
-        """Fetches a list of playlist ids that match."""
+    def match_playlists(self, playlists: list[PlaylistHeader]) -> Iterable[Optional[int]]:
+        """Fetches playlist ids that match the name or similar."""
         return [None for _ in playlists]
 
-    def match_directories(self, directories: list[Directory]) -> list[Optional[int]]:
-        """Fetches a list of directory ids that match."""
+    def match_directories(self, directories: list[Directory]) -> Iterable[Optional[int]]:
+        """Fetches directory ids that match the location or similar."""
         return [None for _ in directories]
 
     # Query methods

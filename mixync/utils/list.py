@@ -1,4 +1,4 @@
-from typing import Callable, Optional, TypeVar, Any
+from typing import Callable, Iterable, Optional, TypeVar, Any
 
 T = TypeVar('T')
 U = TypeVar('U')
@@ -16,5 +16,5 @@ def uncompact(xs: list[T], pattern: list[Optional[Any]]) -> list[Optional[T]]:
         ys.append(next(it) if p else None)
     return ys
 
-def with_compact(f: Callable[[list[T]], list[U]], xs: list[Optional[T]]) -> list[Optional[U]]:
-    return uncompact(f(compact(xs)), xs)
+def with_compact(f: Callable[[list[T]], Iterable[U]], xs: list[Optional[T]]) -> list[Optional[U]]:
+    return uncompact(list(f(compact(xs))), xs)
