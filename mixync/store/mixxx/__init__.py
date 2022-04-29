@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import sessionmaker
 from hashlib import sha1
 from pathlib import Path
@@ -14,6 +14,7 @@ from mixync.model.keys import Keys
 from mixync.model.playlist import Playlist
 from mixync.model.track import Track
 from mixync.store import Store
+from mixync.store.mixxx.model import directory
 from mixync.store.mixxx.model.crate import *
 from mixync.store.mixxx.model.crate_track import *
 from mixync.store.mixxx.model.cue import *
@@ -254,7 +255,18 @@ class MixxxStore(Store):
         new_ids = []
         with self.make_session.begin() as session:
             for track in tracks:
-                # TODO: Location, cues
+                location = session.query(MixxxTrackLocation).where(MixxxTrackLocation.location == track.location).first()
+                if not location:
+                    path = Path(track.location).resolve()
+                    location = session.add(MixxxTrackLocation(
+                        location=track.location,
+                        filename=path.name,
+                        directory=str(path.parent),
+                        filesize=path.stat().st_size,
+                        fs_deleted=0,
+                        needs_verification=0
+                    ))
+                # TODO: Insert main cue point as 'cuepoint' (in addition to the cues below)?
                 new_track = session.merge(MixxxTrack(
                     id=track.id,
                     name=track.name,
@@ -262,6 +274,7 @@ class MixxxStore(Store):
                     album=track.album,
                     year=track.year,
                     genre=track.genre,
+                    location=location.id,
                     comment=track.comment,
                     url=track.url,
                     duration=float(track.duration_ms) / 1000.0 if track.duration_ms else None,
@@ -281,6 +294,19 @@ class MixxxStore(Store):
                 ))
                 session.flush()
                 new_ids.append(new_track.id)
+                # TODO: More sophisticated cue merging strategy?
+                if track.cues:
+                    session.execute(delete(MixxxCue).where(MixxxCue.track_id == new_track.id))
+                    for cue in track.cues:
+                        session.merge(MixxxCue(
+                            type=cue.type,
+                            position_ms=cue.position_ms,
+                            length_ms=cue.length_ms,
+                            hotcue=cue.hotcue,
+                            label=cue.label,
+                            color=cue.color,
+                            track_id=new_track.id
+                        ))
         return new_ids
 
     def update_directories(self, directories: list[Directory]) -> list[int]:

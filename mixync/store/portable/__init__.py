@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, delete
-from sqlalchemy.orm import sessionmaker, make_transient
+from sqlalchemy.orm import sessionmaker
 from pathlib import Path
 from typing import Iterable
 
@@ -196,16 +196,16 @@ class PortableStore(Store):
                 # TODO: More sophisticated cue merging strategy?
                 if track.cues:
                     session.execute(delete(PortableCue).where(PortableCue.track_id == new_track.id))
-                for cue in track.cues:
-                    session.merge(PortableCue(
-                        type=cue.type,
-                        position_ms=cue.position_ms,
-                        length_ms=cue.length_ms,
-                        hotcue=cue.hotcue,
-                        label=cue.label,
-                        color=cue.color,
-                        track_id=new_track.id
-                    ))
+                    for cue in track.cues:
+                        session.merge(PortableCue(
+                            type=cue.type,
+                            position_ms=cue.position_ms,
+                            length_ms=cue.length_ms,
+                            hotcue=cue.hotcue,
+                            label=cue.label,
+                            color=cue.color,
+                            track_id=new_track.id
+                        ))
         return new_ids
 
     def update_directories(self, directories: list[Directory]) -> list[int]:
