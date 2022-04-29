@@ -279,11 +279,8 @@ class MixxxStore(Store):
     def match_directories(self, directories: list[Directory]) -> Iterable[Optional[int]]:
         with self.make_session() as session:
             for directory in directories:
-                yield self._query_id(
-                    session,
-                    MixxxDirectory,
-                    MixxxDirectory.directory == directory.location
-                )
+                row = session.query(MixxxDirectory).where(MixxxDirectory.directory == directory.location).first()
+                yield self._directory_id(row.directory) if row else None
     
     def match_playlists(self, playlists: list[PlaylistHeader]) -> Iterable[Optional[int]]:
         with self.make_session() as session:
