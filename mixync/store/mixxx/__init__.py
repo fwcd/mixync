@@ -247,8 +247,22 @@ class MixxxStore(Store):
                     track_ids=[t.id for t in session.query(MixxxPlaylistTrack).where(MixxxPlaylistTrack.playlist_id == playlist.id)]
                 )
     
-    # TODO: Update methods and upload
+    def update_tracks(self, tracks: list[Track]) -> list[int]:
+        # TODO
+        return super().update_tracks(tracks)
 
+    def update_directories(self, directories: list[Directory]) -> list[int]:
+        # TODO
+        return super().update_directories(directories)
+
+    def update_crates(self, crates: list[Crate]) -> list[int]:
+        # TODO
+        return super().update_crates(crates)
+
+    def update_playlists(self, playlists: list[Playlist]) -> list[int]:
+        # TODO
+        return super().update_playlists(playlists)
+    
     def download_track(self, location: str) -> bytes:
         with open(location, 'rb') as f:
             return f.read()
