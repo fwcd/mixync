@@ -187,7 +187,7 @@ class MixxxStore(Store):
                 MixxxTrack.artist == artist if artist else None,
             ] if c]
             for track in session.query(MixxxTrack).where(*constraints):
-                def sample_to_ms(s) -> int:
+                def sample_to_ms(s: int) -> int:
                     return int(s * 1000 / (track.channels * track.samplerate))
 
                 location = session.query(MixxxTrackLocation).where(MixxxTrackLocation.id == track.location).first()
@@ -350,12 +350,18 @@ class MixxxStore(Store):
                 new_ids.append(new_track.id)
                 # TODO: More sophisticated cue merging strategy?
                 if track.cues:
+                    def ms_to_sample(m: int) -> Optional[int]:
+                        if track.channels and track.sample_rate:
+                            return int((m * track.channels * track.sample_rate) / 1000)
+                        else:
+                            return None
+
                     session.execute(delete(MixxxCue).where(MixxxCue.track_id == new_track.id))
                     for cue in track.cues:
                         session.merge(MixxxCue(
                             type=cue.type,
-                            position_ms=cue.position_ms,
-                            length_ms=cue.length_ms,
+                            position=ms_to_sample(cue.position_ms) if cue.position_ms else None,
+                            length=ms_to_sample(cue.length_ms),
                             hotcue=cue.hotcue,
                             label=cue.label,
                             color=cue.color,
