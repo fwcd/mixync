@@ -118,20 +118,26 @@ class Store:
     def copy_track_files_to(self, other: Store, tracks: list[Track], dest_tracks: list[Optional[Track]], id_mappings: IdMappings, opts: Options):
         """Copies actual track files to the given store."""
         zipped_tracks = [] if opts.dry_run else [(t, d) for t, d in zip(tracks, dest_tracks) if d]
+        copied_count = 0
         with ProgressLine(len(zipped_tracks), final_newline=opts.log) as progress:
             for track, dest_track in zipped_tracks:
-                location = track.location
-                dest_location = dest_track.location
-                raw = self.download_track(location)
-                other.upload_track(dest_location, raw)
-                if opts.log:
-                    prefix = "Copied '"
-                    suffix = f"' ({len(raw) / 1_000_000} MB)"
-                    terminal_width = get_terminal_size((80, 20)).columns
-                    available_width = max(5, terminal_width - len(progress.prefix()) - len(prefix) - len(suffix) - 3)
-                    progress.print(prefix + truncate(Path(location).name, available_width) + suffix)
+                try:
+                    location = track.location
+                    dest_location = dest_track.location
+                    raw = self.download_track(location)
+                    other.upload_track(dest_location, raw)
+                    copied_count += 1
+                    if opts.log:
+                        prefix = "Copied '"
+                        suffix = f"' ({len(raw) / 1_000_000} MB)"
+                        terminal_width = get_terminal_size((80, 20)).columns
+                        available_width = max(5, terminal_width - len(progress.prefix()) - len(prefix) - len(suffix) - 3)
+                        progress.print(prefix + truncate(Path(location).name, available_width) + suffix)
+                except Exception as e:
+                    print(f'Could not copy {track.name}: {e}')
+                    progress.print(f'Skipping track...')
         if opts.log:
-            info(f'Copied {len(zipped_tracks)} track files')
+            info(f'Copied {copied_count} track files ({len(zipped_tracks) - copied_count} skipped)')
 
     def copy_playlists_to(self, other: Store, id_mappings: IdMappings, opts: Options):
         """Copies playlists to the given store."""
