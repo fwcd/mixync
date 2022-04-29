@@ -123,6 +123,43 @@ class PortableStore(Store):
     def _query_id(self, session, cls, *constraints) -> Optional[int]:
         row = session.query(cls).where(*constraints).first()
         return row.id if row else None
+    
+    def match_tracks(self, tracks: list[TrackHeader]) -> Iterable[Optional[int]]:
+        with self.make_session() as session:
+            for track in tracks:
+                yield self._query_id(
+                    session,
+                    PortableTrack,
+                    PortableTrack.name == track.name,
+                    PortableTrack.artist == track.artist
+                )
+    
+    def match_directories(self, directories: list[Directory]) -> Iterable[Optional[int]]:
+        with self.make_session() as session:
+            for directory in directories:
+                yield self._query_id(
+                    session,
+                    PortableDirectory,
+                    PortableDirectory.location == directory.location
+                )
+    
+    def match_playlists(self, playlists: list[PlaylistHeader]) -> Iterable[Optional[int]]:
+        with self.make_session() as session:
+            for playlist in playlists:
+                yield self._query_id(
+                    session,
+                    PortablePlaylist,
+                    PortablePlaylist.name == playlist.name
+                )
+    
+    def match_crates(self, crates: list[CrateHeader]) -> Iterable[Optional[int]]:
+        with self.make_session() as session:
+            for crate in crates:
+                yield self._query_id(
+                    session,
+                    PortableCrate,
+                    PortableCrate.name == crate.name
+                )
 
     def update_tracks(self, tracks: list[Track]) -> list[int]:
         new_ids = []
