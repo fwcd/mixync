@@ -319,6 +319,7 @@ class MixxxStore(Store):
                         fs_deleted=0,
                         needs_verification=0
                     ))
+                    session.flush()
                 # TODO: Insert main cue point as 'cuepoint' (in addition to the cues below)?
                 new_track = session.merge(MixxxTrack(
                     id=track.id,
