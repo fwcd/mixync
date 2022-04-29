@@ -162,7 +162,7 @@ class MixxxStore(Store):
             raise ValueError('Cannot absolutize a track with an empty location path.')
         matching_directory = self._find_matching_directory(location.parts[0], opts).resolve()
         matching_location = matching_directory.parent / location
-        if opts.log:
+        if opts.log and opts.verbose:
             print(f"Mapping '{track.location}' to '{matching_location}'")
         new_track.location = str(matching_location)
         return new_track
