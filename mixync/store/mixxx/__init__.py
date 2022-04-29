@@ -309,7 +309,7 @@ class MixxxStore(Store):
                 # TODO: Insert main cue point as 'cuepoint' (in addition to the cues below)?
                 new_track = session.merge(MixxxTrack(
                     id=track.id,
-                    name=track.name,
+                    title=track.name,
                     artist=track.artist,
                     album=track.album,
                     year=track.year,

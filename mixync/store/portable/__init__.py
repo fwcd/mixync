@@ -54,7 +54,7 @@ class PortableStore(Store):
             for track in session.query(PortableTrack).where(*constraints):
                 yield Track(
                     id=track.id,
-                    name=track.title,
+                    name=track.name,
                     artist=track.artist,
                     location=track.location,
                     album=track.album,
