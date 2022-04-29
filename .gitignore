@@ -3,6 +3,7 @@
 .vscode
 *.mixxxlib
 *.musiclib
+*.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
