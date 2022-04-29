@@ -279,6 +279,7 @@ class MixxxStore(Store):
                     rating=track.rating,
                     color=track.color
                 ))
+                session.flush()
                 new_ids.append(new_track.id)
         return new_ids
 
@@ -289,6 +290,7 @@ class MixxxStore(Store):
                 session.merge(MixxxDirectory(
                     location=directory.location
                 ))
+                session.flush()
                 new_ids.append(self._directory_id(directory.location))
         return new_ids
 
@@ -303,6 +305,7 @@ class MixxxStore(Store):
                     count=len(crate.track_ids),
                     locked=crate.locked
                 ))
+                session.flush()
                 new_ids.append(new_crate.id)
         return new_ids
 
@@ -319,6 +322,7 @@ class MixxxStore(Store):
                     type=playlist.type,
                     locked=playlist.locked
                 ))
+                session.flush()
                 new_ids.append(new_playlist.id)
         return new_ids
     
