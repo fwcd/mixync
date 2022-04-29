@@ -153,7 +153,19 @@ class MixxxStore(Store):
         new_directory.location = str(matching_location)
         return new_directory
     
-    # TODO: absolutize_track
+    def absolutize_track(self, track: Track, opts: Options) -> Optional[Track]:
+        new_track = super().absolutize_track(track, opts)
+        if not new_track:
+            return None
+        location = Path(track.location)
+        if not location.parts:
+            raise ValueError('Cannot absolutize a track with an empty location path.')
+        matching_directory = self._find_matching_directory(location.parts[0], opts).resolve()
+        matching_location = matching_directory.parent / location
+        if opts.log:
+            print(f"Mapping '{track.location}' to '{matching_location}'")
+        new_track.location = str(matching_location)
+        return new_track
     
     def _directory_id(self, location: str) -> int:
         return int(sha1(location.encode('utf8')).hexdigest(), 16)
