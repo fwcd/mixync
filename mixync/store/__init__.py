@@ -231,7 +231,7 @@ class Store:
         return []
     
     def track_directory_name(self, track: Track) -> Optional[str]:
-        """Fetches the directory name for a track."""
+        """Fetches the directory name for a relativized track."""
         return None
     
     # Update methods

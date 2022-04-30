@@ -160,6 +160,9 @@ class PortableStore(Store):
                     PortableCrate,
                     PortableCrate.name == crate.name
                 )
+    
+    def track_directory_name(self, track: Track) -> Optional[str]:
+        return Path(track.location).name
 
     def update_tracks(self, tracks: list[Track]) -> list[int]:
         new_ids = []

@@ -178,6 +178,9 @@ class MixxxStore(Store):
                     location=directory.directory
                 )
     
+    def track_directory_name(self, track: Track) -> Optional[str]:
+        return Path(track.location).name
+    
     # TODO: Use SQLAlechemy ORM relationships to model e.g. track_locations or crate_tracks
     
     def tracks(self, name: Optional[str]=None, artist: Optional[str]=None) -> Iterable[Track]:

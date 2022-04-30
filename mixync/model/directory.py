@@ -9,6 +9,3 @@ class Directory:
 
     id: Optional[int]
     location: str
-
-    def name(self):
-        return re.split(r'[/\\]', self.location)[0]
