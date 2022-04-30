@@ -9,7 +9,7 @@ from mixync.model.crate import Crate, CrateHeader
 from mixync.model.directory import Directory
 from mixync.model.playlist import Playlist, PlaylistHeader
 from mixync.model.track import Track, TrackHeader
-from mixync.options import Options
+from mixync.options import Options, ResourceType
 from mixync.utils.cli import info
 from mixync.utils.progress import ProgressLine
 from mixync.utils.str import truncate
@@ -76,11 +76,19 @@ class Store:
         #       'absolutize_directory' about the mapping before writing anything.
         #       Also we want to make sure that tracks are copied before playlists
         #       and crates, since otherwise the ids wouldn't be mapped.
-        self.copy_directories_to(other, id_mappings, opts)
-        tracks, dest_tracks = self.copy_tracks_to(other, id_mappings, opts)
-        self.copy_track_files_to(other, tracks, dest_tracks, id_mappings, opts)
-        self.copy_playlists_to(other, id_mappings, opts)
-        self.copy_crates_to(other, id_mappings, opts)
+
+        if opts.filters(ResourceType.DIRECTORY):
+            self.copy_directories_to(other, id_mappings, opts)
+
+        if opts.filters(ResourceType.TRACK):
+            tracks, dest_tracks = self.copy_tracks_to(other, id_mappings, opts)
+            self.copy_track_files_to(other, tracks, dest_tracks, id_mappings, opts)
+
+        if opts.filters(ResourceType.PLAYLIST):
+            self.copy_playlists_to(other, id_mappings, opts)
+
+        if opts.filters(ResourceType.CRATE):
+            self.copy_crates_to(other, id_mappings, opts)
 
     def copy_directories_to(self, other: Store, id_mappings: IdMappings, opts: Options):
         """Copies directory metadata to the given store."""
@@ -103,7 +111,7 @@ class Store:
         tracks = list(self.tracks())
         # Relativize paths here, absolute them in the other store
         rel_tracks = [self.relativize_track(t, opts) for t in tracks]
-        dest_tracks = [other.absolutize_track(t, opts) if t and (not opts.filter_dirs or self.track_directory(t) in opts.filter_dirs) else None for t in rel_tracks]
+        dest_tracks = [other.absolutize_track(t, opts) if t and (not opts.filter_dirs or self.track_directory_name(t) in opts.filter_dirs) else None for t in rel_tracks]
         updated_tracks = [t for t in dest_tracks if t]
         # Map the ids (by first looking up already known mappings, then matching)
         mapped_tracks = id_mappings.tracks.apply_or_match(updated_tracks, lambda ts: other.match_tracks([t.header() for t in ts]))
@@ -222,8 +230,8 @@ class Store:
         """Fetches the directories from this store."""
         return []
     
-    def track_directory(self, track: Track) -> Optional[Directory]:
-        """Fetches the directory for a track."""
+    def track_directory_name(self, track: Track) -> Optional[str]:
+        """Fetches the directory name for a track."""
         return None
     
     # Update methods

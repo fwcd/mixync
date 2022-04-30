@@ -1,6 +1,13 @@
 from dataclasses import dataclass, field
+from enum import IntEnum
 from pathlib import Path
 from typing import Optional
+
+class ResourceType(IntEnum):
+    TRACK = 0
+    DIRECTORY = 1
+    PLAYLIST = 2
+    CRATE = 3
 
 @dataclass
 class Options:
@@ -19,5 +26,10 @@ class Options:
     # copying to the @local Mixxx store, the directories would be placed
     # under this directory.
     dest_root_dir: Optional[Path] = None
-    # Names of music directories to include.
+    # Resource types to copy (all by default).
+    filter: set[ResourceType] = field(default_factory=set)
+    # Names of music directories to copy (all by default).
     filter_dirs: set[str] = field(default_factory=set)
+
+    def filters(self, type: ResourceType) -> bool:
+        return not self.filter or type in self.filter

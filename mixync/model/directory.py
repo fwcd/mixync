@@ -1,3 +1,5 @@
+import re
+
 from dataclasses import dataclass
 from typing import Optional
 
@@ -7,3 +9,6 @@ class Directory:
 
     id: Optional[int]
     location: str
+
+    def name(self):
+        return re.split(r'[/\\]', self.location)[0]

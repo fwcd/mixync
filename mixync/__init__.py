@@ -3,7 +3,7 @@ import sys
 
 from pathlib import Path
 
-from mixync.options import Options
+from mixync.options import Options, ResourceType
 from mixync.store import Store
 from mixync.store.debug import DebugStore
 from mixync.store.mixxx import MixxxStore
@@ -14,6 +14,13 @@ STORES = [
     MixxxStore,
     PortableStore,
 ]
+
+RESOURCE_TYPES = {
+    'tracks': ResourceType.TRACK,
+    'directories': ResourceType.DIRECTORY,
+    'playlists': ResourceType.PLAYLIST,
+    'crates': ResourceType.CRATE,
+}
 
 def parse_ref(ref: str) -> Store:
     for store_cls in STORES:
@@ -29,6 +36,7 @@ def main():
     parser.add_argument('source', help='The source ref (to be copied from)')
     parser.add_argument('dest', help='The destination ref (to be copied to)')
     parser.add_argument('-r', '--dest-root-dir', type=str, help='A root folder to place copied music directories in. Only used by some destination stores.')
+    parser.add_argument('-f', '--filter', default='', help=f"Comma-separated list of resource types to filter (all by default, supported types: {', '.join(sorted(RESOURCE_TYPES.keys()))}).")
     parser.add_argument('-d', '--filter-dirs', default='', help='Comma-separated list of directory names to filter.')
     parser.add_argument('-y', '--assume-yes', action='store_true', help='Whether to disable interactive prompts.')
     parser.add_argument('-v', '--verbose', action='store_true', help='Whether to log verbosely.')
@@ -48,6 +56,7 @@ def main():
         dry_run=args.dry_run,
         assume_yes=args.assume_yes,
         dest_root_dir=Path(args.dest_root_dir) if args.dest_root_dir else None,
+        filter={t for t in [RESOURCE_TYPES.get(t, None) for t in args.resource_types.split(',')] if t},
         filter_dirs={d.strip() for d in args.filter_dirs.split(',')}
     )
 
