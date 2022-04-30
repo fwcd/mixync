@@ -134,8 +134,9 @@ class Store:
                         available_width = max(5, terminal_width - len(progress.prefix()) - len(prefix) - len(suffix) - 3)
                         progress.update(prefix + truncate(Path(location).name, available_width) + suffix)
                 except Exception as e:
-                    progress.print(f'Could not copy {track.name}: {e}')
-                    progress.update(f'Skipping track...')
+                    if opts.log:
+                        progress.print(f'Could not copy {track.name}: {e}')
+                        progress.update(f'Skipping track...')
         if opts.log:
             info(f'Copied {copied_count} track files ({len(zipped_tracks) - copied_count} skipped)')
 
@@ -150,8 +151,8 @@ class Store:
                 mapped_id = id_mappings.tracks.get(track_id)
                 if mapped_id:
                     mapped_ids.add(mapped_id)
-                else:
-                    print(f"Warning: Track id {track_id} from playlist '{playlist.name}' could not be mapped.")
+                elif opts.log and opts.verbose:
+                    print(f"Skipping track id {track_id} from playlist '{playlist.name}', since it could not be mapped.")
             mapped_playlists.append(replace(playlist, track_ids=mapped_ids))
         # Update the playlists
         if not opts.dry_run:
@@ -171,8 +172,8 @@ class Store:
                 mapped_id = id_mappings.tracks.get(track_id)
                 if mapped_id:
                     mapped_ids.add(mapped_id)
-                else:
-                    print(f"Warning: Track id {track_id} from crate '{crate.name}' could not be mapped.")
+                elif opts.log and opts.verbose:
+                    print(f"Skipping track id {track_id} from crate '{crate.name}', since it could not be mapped.")
             mapped_crates.append(replace(crate, track_ids=mapped_ids))
         # Update the crates
         if not opts.dry_run:
@@ -220,6 +221,10 @@ class Store:
     def directories(self) -> Iterable[Directory]:
         """Fetches the directories from this store."""
         return []
+    
+    def track_directory(self, track: Track) -> Optional[Directory]:
+        """Fetches the directory for a track."""
+        return None
     
     # Update methods
     
