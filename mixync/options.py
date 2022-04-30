@@ -5,9 +5,8 @@ from typing import Optional
 
 class ResourceType(IntEnum):
     TRACK = 0
-    DIRECTORY = 1
-    PLAYLIST = 2
-    CRATE = 3
+    PLAYLIST = 1
+    CRATE = 2
 
 @dataclass
 class Options:

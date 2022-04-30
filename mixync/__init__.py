@@ -17,7 +17,6 @@ STORES = [
 
 RESOURCE_TYPES = {
     'tracks': ResourceType.TRACK,
-    'directories': ResourceType.DIRECTORY,
     'playlists': ResourceType.PLAYLIST,
     'crates': ResourceType.CRATE,
 }

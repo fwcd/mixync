@@ -49,8 +49,8 @@ mixync ~/my-library.musiclib @local
 More advanced examples include:
 
 ```sh
-# Copy only tracks, directories and playlists from your local mixxxdb to a portable musiclib
-mixync -f tracks,directories,playlists @local ~/my-library.musiclib
+# Copy only tracks and playlists from your local mixxxdb to a portable musiclib
+mixync -f tracks,playlists @local ~/my-library.musiclib
 ```
 
 ```sh

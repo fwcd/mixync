@@ -77,8 +77,7 @@ class Store:
         #       Also we want to make sure that tracks are copied before playlists
         #       and crates, since otherwise the ids wouldn't be mapped.
 
-        if opts.filters(ResourceType.DIRECTORY):
-            self.copy_directories_to(other, id_mappings, opts)
+        self.copy_directories_to(other, id_mappings, opts)
 
         if opts.filters(ResourceType.TRACK):
             tracks, dest_tracks = self.copy_tracks_to(other, id_mappings, opts)
