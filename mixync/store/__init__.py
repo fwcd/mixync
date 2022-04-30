@@ -103,7 +103,7 @@ class Store:
         tracks = list(self.tracks())
         # Relativize paths here, absolute them in the other store
         rel_tracks = [self.relativize_track(t, opts) for t in tracks]
-        dest_tracks = [other.absolutize_track(t, opts) if t else None for t in rel_tracks]
+        dest_tracks = [other.absolutize_track(t, opts) if t and (not opts.filter_dirs or self.track_directory(t) in opts.filter_dirs) else None for t in rel_tracks]
         updated_tracks = [t for t in dest_tracks if t]
         # Map the ids (by first looking up already known mappings, then matching)
         mapped_tracks = id_mappings.tracks.apply_or_match(updated_tracks, lambda ts: other.match_tracks([t.header() for t in ts]))
