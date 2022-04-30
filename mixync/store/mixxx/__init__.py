@@ -179,7 +179,8 @@ class MixxxStore(Store):
                 )
     
     def track_directory_name(self, track: Track) -> Optional[str]:
-        return Path(track.location).name
+        parts = Path(track.location).parts
+        return parts[0] if parts else None
     
     # TODO: Use SQLAlechemy ORM relationships to model e.g. track_locations or crate_tracks
     
