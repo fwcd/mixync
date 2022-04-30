@@ -59,4 +59,7 @@ def main():
         filter_dirs={d.strip() for d in args.filter_dirs.split(',') if d.strip()}
     )
 
+    if opts.filter and not ResourceType.TRACK in opts.filter:
+        print('Warning: Not including tracks in your filter will always lead to empty playlists/crates!')
+
     source.copy_to(dest, opts=opts)
