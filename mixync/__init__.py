@@ -56,7 +56,7 @@ def main():
         dry_run=args.dry_run,
         assume_yes=args.assume_yes,
         dest_root_dir=Path(args.dest_root_dir) if args.dest_root_dir else None,
-        filter={t for t in [RESOURCE_TYPES.get(t, None) for t in args.resource_types.split(',')] if t},
+        filter={t for t in [RESOURCE_TYPES.get(t, None) for t in args.filter.split(',')] if t},
         filter_dirs={d.strip() for d in args.filter_dirs.split(',')}
     )
 
