@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
@@ -19,3 +19,5 @@ class Options:
     # copying to the @local Mixxx store, the directories would be placed
     # under this directory.
     dest_root_dir: Optional[Path] = None
+    # Names of music directories to include.
+    filter_dirs: set[str] = field(default_factory=set)
